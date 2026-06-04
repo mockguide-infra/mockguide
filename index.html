@@ -318,7 +318,13 @@
                 nodeItem.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-gray-400">
                         <span>DATABASE TARGET REFERENCE BLOCK RECORD INDEX ENTRY #${indexIdx + 1}</span>
-                        <span class="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded">Weight Factor: ${qItem.Points || 1} Pt</span>
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded">Weight: ${qItem.Points || 1} Pt</span>
+                            <!-- Naya Delete Button -->
+                            <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded border border-red-200 transition flex items-center space-x-1 font-bold cursor-pointer">
+                                <i class="fa-solid fa-trash-can"></i> <span>Delete</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
@@ -340,7 +346,15 @@
                 targetContainer.appendChild(nodeItem);
             });
         }
-
+window.deleteQuestionItem = function(targetIndex) {
+            if(confirm("Are you sure you want to delete Question #" + (targetIndex + 1) + "?")) {
+                masterRecordsArray.splice(targetIndex, 1);
+                if(masterRecordsArray.length === 0) {
+                    document.getElementById('live-manifest-card').classList.add('hidden');
+                }
+                syncAdminEditormanifest();
+            }
+        };
         window.mutateStorageCell = function(targetIdx, schemaKey, updatedValueString) {
             masterRecordsArray[targetIdx][schemaKey] = updatedValueString;
         };
