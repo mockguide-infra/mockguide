@@ -14,6 +14,7 @@
     <style>
         html { scroll-behavior: smooth; }
         .grid-box { transition: all 0.2s ease; }
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
@@ -92,6 +93,30 @@
                     </div>
                 </div>
                 <div id="dynamic-editor-holder" class="space-y-6 divide-y divide-gray-100"></div>
+            </div>
+
+            <div id="admin-results-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <div class="border-b border-gray-100 pb-3">
+                    <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i>Live Student Responses & Analytics (Rank Ordered)</h3>
+                    <p class="text-xs text-gray-400">Realtime tracking parameters fetched directly from secure database registry node nodes.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                                <th class="p-3 font-semibold">Rank</th>
+                                <th class="p-3 font-semibold">Student Name</th>
+                                <th class="p-3 font-semibold">Email</th>
+                                <th class="p-3 font-semibold">Contact No</th>
+                                <th class="p-3 font-semibold text-center">Score</th>
+                                <th class="p-3 font-semibold text-center">Percentage</th>
+                                <th class="p-3 font-semibold text-center">Tab Switches</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-results-tbody" class="divide-y divide-gray-100">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -216,10 +241,9 @@
                     <div id="res-percentage-text" class="text-lg font-bold mt-1">Accuracy: 0%</div>
                 </div>
                 
-                <div class="pt-4">
-                    <button onclick="window.close();" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm cursor-pointer">
-                        <i class="fa-solid fa-rectangle-xmark mr-1.5"></i> Close Window
-                    </button>
+                <div class="pt-6 border-t border-gray-100 mt-6 text-center space-y-2">
+                    <p class="text-md font-bold text-gray-800"><i class="fa-solid fa-circle-info text-blue-500 mr-1"></i> Your test is over. You can close this window now.</p>
+                    <p class="text-xs text-gray-400">Your response has been securely locked and recorded in the administrator's database registry.</p>
                 </div>
             </div>
         </div>
@@ -276,10 +300,15 @@
         let trackedClientSelections = {};
         let isStudentRuntimeActive = false;
         let globalTestMeta = { name: "General Mock Test", duration: 120 };
+        
+        let currentQuizDatabaseID = "";
+        let studentProfile = { name: "", email: "", phone: "" };
+        let proctorTabSwitchCount = 0;
 
         function handleLogoClick() {
-            if(isStudentRuntimeActive) {
-                alert("Navigation locked! You cannot exit during an active examination window.");
+            const URLParameters = new URLSearchParams(window.location.search);
+            if(isStudentRuntimeActive || URLParameters.has('quiz')) {
+                alert("Strict Security Lock: You cannot exit the examination terminal or return to the admin setup!");
             } else {
                 localStorage.clear();
                 location.href = window.location.pathname;
@@ -292,6 +321,22 @@
             const targetedQuizID = URLParameters.get('quiz');
             
             if (targetedQuizID) {
+                currentQuizDatabaseID = targetedQuizID;
+                
+                // Strict block re-entry if already submitted from this browser instance
+                if (localStorage.getItem('quiz_completed_' + targetedQuizID) === 'true') {
+                    document.getElementById('admin-zone').classList.add('hidden');
+                    document.getElementById('student-gateway-zone').innerHTML = `
+                        <div class="text-center space-y-4 p-6 bg-red-50 border border-red-200 rounded-xl">
+                            <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
+                            <h2 class="text-xl font-bold text-gray-900">Submission Block Active</h2>
+                            <p class="text-sm text-gray-600">You have already completed and submitted this examination instance. Multiple attempts are strictly prohibited.</p>
+                        </div>
+                    `;
+                    document.getElementById('student-gateway-zone').classList.remove('hidden');
+                    return;
+                }
+
                 databaseRef.ref('live_quizzes/' + targetedQuizID).once('value')
                     .then((snapshot) => {
                         if (snapshot.exists()) {
@@ -303,6 +348,8 @@
                             const savedRuntimeActiveStatus = localStorage.getItem('isStudentRuntimeActive_' + targetedQuizID);
                             if (savedRuntimeActiveStatus === 'true') {
                                 isStudentRuntimeActive = true;
+                                studentProfile = JSON.parse(localStorage.getItem('studentProfile_' + targetedQuizID)) || { name: "Anonymous", email: "", phone: "" };
+                                proctorTabSwitchCount = parseInt(localStorage.getItem('proctorTabSwitchCount_' + targetedQuizID)) || 0;
                                 trackedClientSelections = JSON.parse(localStorage.getItem('trackedClientSelections_' + targetedQuizID)) || {};
                                 executionPointer = parseInt(localStorage.getItem('executionPointer_' + targetedQuizID)) || 0;
                                 timeBudgetSeconds = parseInt(localStorage.getItem('timeBudgetSeconds_' + targetedQuizID)) || (globalTestMeta.duration * 60);
@@ -322,8 +369,49 @@
                             alert("Exam ID entry reference record not found.");
                         }
                     });
+            } else {
+                // If on pure admin page, boot dynamic listener row hooks to fetch global logs arrays
+                fetchAndRenderAdminLeaderboard();
             }
         });
+
+        // NAYA FEATURE: Fetch and rank results into admin logs dashboard list
+        function fetchAndRenderAdminLeaderboard() {
+            databaseRef.ref('quiz_results').on('value', (snapshot) => {
+                const tbody = document.getElementById('admin-results-tbody');
+                tbody.innerHTML = "";
+                
+                if (snapshot.exists()) {
+                    document.getElementById('admin-results-card').classList.remove('hidden');
+                    let rawList = [];
+                    
+                    snapshot.forEach((childQuiz) => {
+                        childQuiz.forEach((entry) => {
+                            rawList.push(entry.val());
+                        });
+                    });
+                    
+                    // Sort descending matching high percentile matrix standards
+                    rawList.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
+                    
+                    rawList.forEach((row, rIdx) => {
+                        const scoreColorClass = row.scorePercent >= 70 ? 'text-emerald-600 font-bold' : (row.scorePercent >= 50 ? 'text-amber-600 font-bold' : 'text-red-600 font-bold');
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-gray-50/80 transition text-gray-700 border-b border-gray-100";
+                        tr.innerHTML = `
+                            <td class="p-3 font-bold text-gray-400">#${rIdx + 1}</td>
+                            <td class="p-3 font-semibold text-gray-900">${row.studentName}</td>
+                            <td class="p-3 text-gray-500">${row.studentEmail || 'N/A'}</td>
+                            <td class="p-3 text-gray-500">${row.studentPhone || 'N/A'}</td>
+                            <td class="p-3 text-center font-mono font-medium">${row.scoreRaw}</td>
+                            <td class="p-3 text-center font-mono ${scoreColorClass}">${row.scorePercent}%</td>
+                            <td class="p-3 text-center font-mono text-red-500 font-bold">${row.tabSwitches || 0}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            });
+        }
 
         function showStudentGatewayForm() {
             document.getElementById('admin-zone').classList.add('hidden');
@@ -334,31 +422,27 @@
 
         document.getElementById('gateway-start-btn').addEventListener('click', () => {
             const nameInput = document.getElementById('std-input-name').value.trim();
+            const emailInput = document.getElementById('std-input-email').value.trim();
+            const phoneInput = document.getElementById('std-input-phone').value.trim();
+            
             if(!nameInput) {
                 alert("Please enter your name to start the test.");
                 return;
             }
             
-            const URLParameters = new URLSearchParams(window.location.search);
-            const quizID = URLParameters.get('quiz') || 'preview';
+            studentProfile.name = nameInput;
+            studentProfile.email = emailInput;
+            studentProfile.phone = phoneInput;
+            
+            const quizID = currentQuizDatabaseID || 'preview';
             localStorage.setItem('isStudentRuntimeActive_' + quizID, 'true');
+            localStorage.setItem('studentProfile_' + quizID, JSON.stringify(studentProfile));
             
             document.getElementById('student-gateway-zone').classList.add('hidden');
             transitionToStudentRuntime();
         });
 
         // --- ADMINISTRATIVE CONFIGURATIONS ---
-        function downloadCSVTemplate() {
-            const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "MockGuide_Template.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
@@ -471,7 +555,6 @@
             }
         };
 
-        // 100% Core Fixed Generate Cloud Link System Button
         document.getElementById('generate-link-btn').addEventListener('click', () => {
             if(masterRecordsArray.length === 0) return;
             
@@ -497,28 +580,8 @@
                 })
                 .catch((error) => {
                     btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
-                    alert("Cloud saving engine parameters block error: " + error.message);
+                    alert("Cloud saving error: " + error.message);
                 });
-        });
-
-        // Copy and Dismiss View Modal Engine Event Actions Fully Wired
-        document.getElementById('copy-url-btn').addEventListener('click', () => {
-            const copyInputTarget = document.getElementById('share-url-string');
-            copyInputTarget.select();
-            document.execCommand('copy'); // Fail-safe fallback native mechanism
-            navigator.clipboard.writeText(copyInputTarget.value);
-            
-            const btnRef = document.getElementById('copy-url-btn');
-            btnRef.innerText = "Copied!";
-            btnRef.className = "bg-green-600 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
-            setTimeout(() => {
-                btnRef.innerText = "Copy Link";
-                btnRef.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
-            }, 1500);
-        });
-
-        document.getElementById('close-share-modal').addEventListener('click', () => {
-            document.getElementById('share-modal').classList.add('hidden');
         });
 
         document.getElementById('admin-launch-btn').addEventListener('click', () => {
@@ -543,13 +606,13 @@
             triggerSystemClockTicker();
         }
 
-        // --- STUDENT RUNTIME OPERATIONS ENGINE ---
+        // --- STUDENT RUNTIME OPERATIONS ---
         function compileStudentNavigationConsole() {
-            const URLParameters = new URLSearchParams(window.location.search);
-            const quizID = URLParameters.get('quiz') || 'preview';
+            const quizID = currentQuizDatabaseID || 'preview';
             localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections));
             localStorage.setItem('executionPointer_' + quizID, executionPointer);
             localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
+            localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount);
 
             renderStudentMatrixDock();
             renderActiveQuestionViewport();
@@ -692,8 +755,7 @@
             countdownTimerObject = setInterval(() => {
                 timeBudgetSeconds--;
                 
-                const URLParameters = new URLSearchParams(window.location.search);
-                const quizID = URLParameters.get('quiz') || 'preview';
+                const quizID = currentQuizDatabaseID || 'preview';
                 localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
 
                 if(timeBudgetSeconds <= 0) {
@@ -710,7 +772,6 @@
 
                     const formattedTimeString = `${String(hoursParameter).padStart(2, '0')}:${String(minutesParameter).padStart(2, '0')}:${String(secondsParameter).padStart(2, '0')}`;
                     
-                    // Clocks synchronous double assignment string variables
                     document.getElementById('std-clock-readout').innerText = formattedTimeString;
                     document.getElementById('sync-sub-clock').innerText = formattedTimeString;
                 }
@@ -721,8 +782,8 @@
             clearInterval(countdownTimerObject);
             isStudentRuntimeActive = false; 
             
-            const URLParameters = new URLSearchParams(window.location.search);
-            const quizID = URLParameters.get('quiz') || 'preview';
+            const quizID = currentQuizDatabaseID || 'preview';
+            localStorage.setItem('quiz_completed_' + quizID, 'true'); // Final Submit Lock string
             localStorage.removeItem('isStudentRuntimeActive_' + quizID);
 
             let incrementalCorrectCounter = 0;
@@ -744,6 +805,20 @@
 
             const rawCalculatedPercentage = Math.round((incrementalCorrectCounter / masterRecordsArray.length) * 100);
 
+            // NAYA FEATURE: Save score structural metrics securely directly to cloud nodes under quiz id node arrays
+            if(currentQuizDatabaseID && currentQuizDatabaseID !== "") {
+                const analyticsNodePayload = {
+                    studentName: studentProfile.name || "Anonymous",
+                    studentEmail: studentProfile.email || "N/A",
+                    studentPhone: studentProfile.phone || "N/A",
+                    scoreRaw: `${incrementalCorrectCounter} / ${masterRecordsArray.length}`,
+                    scorePercent: rawCalculatedPercentage,
+                    tabSwitches: proctorTabSwitchCount,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                databaseRef.ref('quiz_results/' + currentQuizDatabaseID).push(analyticsNodePayload);
+            }
+
             document.getElementById('res-total-q').innerText = masterRecordsArray.length;
             document.getElementById('res-correct-q').innerText = incrementalCorrectCounter;
             document.getElementById('res-wrong-q').innerText = incrementalWrongCounter;
@@ -764,6 +839,49 @@
             document.getElementById('student-zone').classList.add('hidden');
             document.getElementById('results-zone').classList.remove('hidden');
         }
+
+        // --- NAYA FEATURE: STRICT PROCTORING & ANTI-CHEATING PROTOCOLS ---
+        document.addEventListener('visibilitychange', () => {
+            if (isStudentRuntimeActive && document.hidden) {
+                proctorTabSwitchCount++;
+                const quizID = currentQuizDatabaseID || 'preview';
+                localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount);
+                alert(`SECURITY WARNING: Tab switching is strictly monitored! Your action has been recorded by the administrator. (Violations: ${proctorTabSwitchCount})`);
+            }
+        });
+
+        document.getElementById('copy-url-btn').addEventListener('click', () => {
+            const copyInputTarget = document.getElementById('share-url-string');
+            copyInputTarget.select();
+            document.execCommand('copy');
+            navigator.clipboard.writeText(copyInputTarget.value);
+            
+            const btnRef = document.getElementById('copy-url-btn');
+            btnRef.innerText = "Copied!";
+            btnRef.className = "bg-green-600 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
+            setTimeout(() => {
+                btnRef.innerText = "Copy Link";
+                btnRef.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
+            }, 1500);
+        });
+
+        document.getElementById('close-share-modal').addEventListener('click', () => {
+            document.getElementById('share-modal').classList.add('hidden');
+        });
+
+        // Anti-Cheating Key Blocks Loop
+        document.addEventListener('contextmenu', event => event.preventDefault()); // Disables Mouse Right-Click
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) {
+                e.preventDefault();
+                alert("Security Violation: Copying or saving exam data is strictly prohibited!");
+            }
+            if (e.key === 'PrintScreen') {
+                navigator.clipboard.writeText(""); 
+                alert("Security Violation: Screenshots are blocked!");
+            }
+        });
     </script>
 </body>
 </html>
