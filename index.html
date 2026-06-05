@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Core Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -20,7 +19,6 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Header Panel -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="handleLogoClick()">
@@ -40,15 +38,18 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- ================= ADMIN ZONE ================= -->
         <div id="admin-zone" class="space-y-6">
-            <!-- Test Dynamic Settings Card -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-2">
                     <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-gear text-blue-600 mr-2"></i>Global Test Configuration Settings</h3>
-                    <button onclick="downloadCSVTemplate()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold py-2 px-3 rounded border border-blue-200 transition flex items-center space-x-1.5">
-                        <i class="fa-solid fa-download"></i> <span>Download CSV Template</span>
-                    </button>
+                    <div class="flex space-x-2">
+                        <button onclick="downloadCSVTemplate('quiz')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold py-2 px-3 rounded border border-blue-200 transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-download"></i> <span>Quiz CSV Template</span>
+                        </button>
+                        <button onclick="downloadCSVTemplate('bank')" class="bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs font-bold py-2 px-3 rounded border border-purple-200 transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-building-columns"></i> <span>Bank CSV Template</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -62,31 +63,43 @@
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- CSV Upload -->
-                <div class="space-y-3">
-                    <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 1: Batch Upload via CSV</h3>
-                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-                        <div class="flex flex-col items-center justify-center pt-4 pb-4">
-                            <i class="fa-solid fa-file-csv text-2xl text-blue-500 mb-2"></i>
-                            <p class="text-xs text-gray-500 font-semibold">Upload ClassMarker Template CSV</p>
-                        </div>
-                        <input type="file" id="csv-uploader" accept=".csv" class="hidden" />
-                    </label>
-                </div>
-                <!-- Manual Direct Insertion -->
-                <div class="space-y-3 flex flex-col justify-between">
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100 pb-2">Input Sourcing Interface</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 2: Manual Direct Insertion</h3>
-                        <p class="text-xs text-gray-500 mt-2">Add individual mock questions instantly directly into the database stack.</p>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">Select Execution Method</label>
+                        <select id="admin-method-dropdown" onchange="toggleMethodSubpanels()" class="w-full text-sm border border-gray-200 rounded p-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="csv">Method 1: Batch Upload via CSV</option>
+                            <option value="manual">Method 2: Manual Direct Insertion</option>
+                            <option value="bank">Method 3: Central Question Bank Vault</option>
+                        </select>
                     </div>
-                    <button id="manual-add-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg text-sm transition shadow-sm flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-plus-circle"></i> <span>Insert Question Manually</span>
-                    </button>
+                    
+                    <div id="subpanel-csv" class="md:col-span-2 flex items-end">
+                        <input type="file" id="csv-uploader" accept=".csv" class="w-full text-xs border border-gray-200 rounded p-2 bg-gray-50" />
+                    </div>
+                    <div id="subpanel-manual" class="hidden md:col-span-2 flex items-end">
+                        <button id="manual-add-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded text-sm transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-plus-circle"></i> <span>Insert Blank Question Into Active Queue</span>
+                        </button>
+                    </div>
+                    <div id="subpanel-bank" class="hidden md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-gray-400 block mb-0.5">Push CSV to Bank</label>
+                            <input type="file" id="bank-csv-uploader" accept=".csv" class="w-full text-xs border border-gray-200 rounded p-1.5 bg-gray-50" />
+                        </div>
+                        <div class="flex items-end space-x-2">
+                            <select id="bank-category-selector" class="flex-1 text-xs border border-gray-200 rounded p-2 bg-white focus:outline-none">
+                                <option value="all">All Bank Categories</option>
+                            </select>
+                            <button onclick="importSelectedCategoryFromBank()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 px-3 rounded transition whitespace-nowrap">
+                                Import Questions
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Editor Engine Roster -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 gap-4">
                     <div>
@@ -105,14 +118,12 @@
                 <div id="dynamic-editor-holder" class="space-y-6 divide-y divide-gray-100"></div>
             </div>
 
-            <!-- Admin Live Results & Analytics Table Viewer Card -->
             <div id="admin-results-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="border-b border-gray-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i>Live Student Responses & Analytics (Rank Ordered)</h3>
                         <p class="text-xs text-gray-400">Realtime tracking parameters fetched directly from secure database registry node nodes.</p>
                     </div>
-                    <!-- Date Filter and Export System Options -->
                     <div class="flex items-center space-x-2 shrink-0">
                         <select id="admin-date-filter" onchange="filterAnalyticsByDate()" class="text-xs border border-gray-300 rounded p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
                             <option value="all">All Dates</option>
@@ -127,23 +138,22 @@
                         <thead>
                             <tr class="bg-gray-50 text-gray-500 uppercase tracking-wider border-b border-gray-200">
                                 <th class="p-3 font-semibold">Rank</th>
+                                <th class="p-3 font-semibold">Test Title</th>
                                 <th class="p-3 font-semibold">Student Name</th>
                                 <th class="p-3 font-semibold">Email</th>
                                 <th class="p-3 font-semibold">Contact No</th>
                                 <th class="p-3 font-semibold text-center">Score</th>
                                 <th class="p-3 font-semibold text-center">Percentage</th>
                                 <th class="p-3 font-semibold text-center">Tab Switches</th>
+                                <th class="p-3 font-semibold text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-results-tbody" class="divide-y divide-gray-100">
-                            <!-- Dynamic rows injected here -->
-                        </tbody>
+                        <tbody id="admin-results-tbody" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ================= STUDENT ENTRY GATEWAY INFO FORM ================= -->
         <div id="student-gateway-zone" class="hidden max-w-md mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-md space-y-6">
             <div class="text-center space-y-2">
                 <h2 id="gateway-test-title" class="text-2xl font-black text-gray-900">General Mock Test</h2>
@@ -170,7 +180,6 @@
             </form>
         </div>
 
-        <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center space-y-1">
@@ -184,8 +193,9 @@
                 <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm min-h-[420px] flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-3 mb-6">
-                            <span id="question-index-label" class="uppercase tracking-wider text-blue-600 font-bold">Question 1 of 1</span>
-                            <button id="modal-trigger-link" class="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-semibold text-sm bg-blue-50 px-3 py-1 rounded">
+                            <span id="std-category-badge" class="uppercase tracking-wider text-purple-600 font-extrabold bg-purple-50 px-2.5 py-1 rounded hidden">Category: N/A</span>
+                            <span id="question-index-label" class="uppercase tracking-wider text-blue-600 font-bold ml-auto">Question 1 of 1</span>
+                            <button id="modal-trigger-link" class="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-semibold text-sm bg-blue-50 px-3 py-1 rounded ml-3">
                                 <i class="fa-solid fa-list-check"></i> <span>See all questions</span>
                             </button>
                         </div>
@@ -229,7 +239,6 @@
             </div>
         </div>
 
-        <!-- ================= ANALYTICS SCOREBOARD PANEL ================= -->
         <div id="results-zone" class="hidden space-y-8 max-w-4xl mx-auto">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                 <h2 class="text-xl font-bold tracking-tight text-gray-900 uppercase">Test Result Dashboard</h2>
@@ -276,14 +285,13 @@
 
     </main>
 
-    <!-- ================= MODAL CHANNELS ================= -->
     <div id="share-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl border border-gray-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100">
                 <i class="fa-solid fa-link"></i>
             </div>
             <h3 class="text-lg font-bold text-gray-900">Shareable Mock Link Active</h3>
-            <p class="text-xs text-gray-400">ClassMarker style miniature database URL created. Share it with your students.</p>
+            <p class="text-xs text-gray-400">ClassMarker style URL generated successfully.</p>
             <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 p-2.5 rounded-lg">
                 <input type="text" id="share-url-string" readonly class="bg-transparent text-xs font-mono text-gray-600 flex-1 focus:outline-none" />
                 <button id="copy-url-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0 cursor-pointer">Copy Link</button>
@@ -305,7 +313,6 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT SYSTEM ENGINE ================= -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
@@ -331,7 +338,7 @@
         let currentQuizDatabaseID = "";
         let studentProfile = { name: "", email: "", phone: "" };
         let proctorTabSwitchCount = 0;
-        let globalResultsCache = []; // Admin view rendering dataset tracker
+        let globalResultsCache = []; 
 
         function handleLogoClick() {
             const URLParameters = new URLSearchParams(window.location.search);
@@ -346,6 +353,18 @@
         function scrollToAnalytics() {
             const target = document.getElementById('admin-results-card');
             if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Dropdown toggle system matching method subpanels layout parameters
+        function toggleMethodSubpanels() {
+            const val = document.getElementById('admin-method-dropdown').value;
+            document.getElementById('subpanel-csv').classList.add('hidden');
+            document.getElementById('subpanel-manual').classList.add('hidden');
+            document.getElementById('subpanel-bank').classList.add('hidden');
+            
+            if(val === 'csv') document.getElementById('subpanel-csv').classList.remove('hidden');
+            if(val === 'manual') document.getElementById('subpanel-manual').classList.remove('hidden');
+            if(val === 'bank') document.getElementById('subpanel-bank').classList.remove('hidden');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -389,6 +408,7 @@
                     });
             } else {
                 fetchAndRenderAdminLeaderboard();
+                syncBankCategoryDropdown();
             }
         });
 
@@ -423,7 +443,6 @@
                 }
 
                 if(nameAlreadyExists) {
-                    // Soft alert on duplicate name trigger parameters block row sequence
                     alert("You have already attempted this test. Contact admin for further request.");
                 } else {
                     studentProfile.name = nameInput;
@@ -440,18 +459,103 @@
             });
         });
 
-        // --- ADMINISTRATIVE ANCHORS ---
-        function downloadCSVTemplate() {
-            const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
+        // --- GLOBAL TEMPLATES DESIGN MATRIX ---
+        function downloadCSVTemplate(type) {
+            let csvContent = "";
+            let fileName = "";
+            
+            if(type === 'quiz') {
+                csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,ImageUrl\nmultiplechoice,Generic Parent,Math,No,Well done!,Sorry,1,3571 + ? - 6086 = 155,A,2400,2630,2515,None of these,,";
+                fileName = "MockGuide_Quiz_Template.csv";
+            } else {
+                csvContent = "Category,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,Points,ImageUrl\nMath,Find missing parameter values inside matrix arrays,A,15,16,18,19,,1,";
+                fileName = "MockGuide_Bank_Template.csv";
+            }
+            
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "MockGuide_Template.csv");
+            link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
+        // --- QUESTION BANK ENGINE ---
+        document.getElementById('bank-csv-uploader').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function(evt) {
+                Papa.parse(evt.target.result, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        results.data.forEach(item => {
+                            const cat = item.Category ? item.Category.trim() : "General";
+                            databaseRef.ref('question_bank/' + cat).push(item);
+                        });
+                        alert("Questions appended directly to central vault registry nodes successfully.");
+                        syncBankCategoryDropdown();
+                    }
+                });
+            };
+        });
+
+        function syncBankCategoryDropdown() {
+            databaseRef.ref('question_bank').once('value').then((snapshot) => {
+                const selector = document.getElementById('bank-category-selector');
+                selector.innerHTML = '<option value="all">All Bank Categories</option>';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const option = document.createElement('option');
+                        option.value = child.key;
+                        option.innerText = child.key;
+                        selector.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        function importSelectedCategoryFromBank() {
+            const targetedCat = document.getElementById('bank-category-selector').value;
+            if(targetedCat === "all") {
+                databaseRef.ref('question_bank').once('value').then((snapshot) => {
+                    if(snapshot.exists()) {
+                        snapshot.forEach(child => {
+                            child.forEach(q => appendBankItemToActiveQueue(q.val()));
+                        });
+                        syncAdminEditormanifest();
+                    }
+                });
+            } else {
+                databaseRef.ref('question_bank/' + targetedCat).once('value').then((snapshot) => {
+                    if(snapshot.exists()) {
+                        snapshot.forEach(q => appendBankItemToActiveQueue(q.val()));
+                        syncAdminEditormanifest();
+                    }
+                });
+            }
+        }
+
+        function appendBankItemToActiveQueue(bankObj) {
+            masterRecordsArray.push({
+                "Question": bankObj.Question || "",
+                "Correct": bankObj.Correct || "A",
+                "Answer A": bankObj["Answer A"] || "",
+                "Answer B": bankObj["Answer B"] || "",
+                "Answer C": bankObj["Answer C"] || "",
+                "Answer D": bankObj["Answer D"] || "",
+                "Answer E": bankObj["Answer E"] || "",
+                "Points": bankObj.Points || "1",
+                "ImageUrl": bankObj.ImageUrl || "",
+                "Category": bankObj.Category || ""
+            });
+        }
+
+        // --- ADMINISTRATIVE CONFIGURATIONS ---
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
@@ -481,7 +585,8 @@
                 "Answer D": "",
                 "Answer E": "",
                 "Points": "1",
-                "ImageUrl": ""
+                "ImageUrl": "",
+                "Category": ""
             };
             masterRecordsArray.push(mockEntryBlueprint);
             syncAdminEditormanifest();
@@ -537,6 +642,9 @@
                             <input type="text" placeholder="https://imgur.com/your-image.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Optional Question Category (e.g., Math, GK)</label>
+                            <input type="text" placeholder="Enter topic tag" value="${qItem.Category || ''}" onchange="mutateStorageCell(${indexIdx}, 'Category', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            
                             <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Choice Alternatives Matrix</label>
                             ${dynamicChoiceBlockRows}
                             <div class="flex items-center space-x-3 pt-1">
@@ -615,13 +723,11 @@
             triggerSystemClockTicker();
         }
 
-        // --- ADMIN SIDE ANALYTICS MAPPING ---
+        // --- ADMIN ANALYTICS LIVE MONITOR ---
         function fetchAndRenderAdminLeaderboard() {
             databaseRef.ref('quiz_results').on('value', (snapshot) => {
                 globalResultsCache = [];
                 const selectFilter = document.getElementById('admin-date-filter');
-                
-                // Clear dynamic keys except standard template reference string elements
                 selectFilter.innerHTML = '<option value="all">All Dates</option>';
                 let dynamicDatesFoundSet = new Set();
 
@@ -631,16 +737,18 @@
                     document.getElementById('header-analytics-btn').classList.add('inline-flex');
                     
                     snapshot.forEach((childQuiz) => {
+                        const quizIdKey = childQuiz.key;
                         childQuiz.forEach((entry) => {
                             const data = entry.val();
+                            // Pack database references unique paths keys for target delete commands loop
+                            data.quizId = quizIdKey;
+                            data.entryKey = entry.key;
+                            
                             globalResultsCache.push(data);
-                            if(data.submissionDate) {
-                                dynamicDatesFoundSet.add(data.submissionDate);
-                            }
+                            if(data.submissionDate) dynamicDatesFoundSet.add(data.submissionDate);
                         });
                     });
                     
-                    // Inject filtered option elements sorted cleanly block row sequences
                     Array.from(dynamicDatesFoundSet).sort().forEach(dateStr => {
                         const opt = document.createElement('option');
                         opt.value = dateStr;
@@ -657,7 +765,6 @@
             const tbody = document.getElementById('admin-results-tbody');
             tbody.innerHTML = "";
             
-            // Sort structural metrics row descending by percentile standards
             let sortedData = [...dataset];
             sortedData.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
             
@@ -667,16 +774,31 @@
                 tr.className = "hover:bg-gray-50/80 transition text-gray-700 border-b border-gray-100";
                 tr.innerHTML = `
                     <td class="p-3 font-bold text-gray-400">#${rIdx + 1}</td>
+                    <td class="p-3 font-semibold text-blue-600">${row.testTitle || 'N/A'}</td>
                     <td class="p-3 font-semibold text-gray-900">${row.studentName}</td>
                     <td class="p-3 text-gray-500">${row.studentEmail || 'N/A'}</td>
                     <td class="p-3 text-gray-500">${row.studentPhone || 'N/A'}</td>
                     <td class="p-3 text-center font-mono font-medium">${row.scoreRaw}</td>
                     <td class="p-3 text-center font-mono ${scoreColorClass}">${row.scorePercent}%</td>
                     <td class="p-3 text-center font-mono text-red-500 font-bold">${row.tabSwitches || 0}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteSingleAnalyticsLog('${row.quizId}', '${row.entryKey}')" class="text-red-500 hover:text-red-700 font-bold text-xs px-2 py-1 bg-red-50 rounded border border-red-100 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
+
+        // NAYA FEATURE: Remove isolated row node tracking data entries dynamically from cloud locker
+        window.deleteSingleAnalyticsLog = function(quizId, entryKey) {
+            if(confirm("Are you sure you want to permanently delete this candidate score row entry from cloud?")) {
+                databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove()
+                    .then(() => alert("Log entry deleted successfully."))
+                    .catch(() => alert("Network communication drop error. Delete failed."));
+            }
+        };
 
         function filterAnalyticsByDate() {
             const targetDate = document.getElementById('admin-date-filter').value;
@@ -691,21 +813,17 @@
         function exportFilteredAnalyticsToCSV() {
             const targetDate = document.getElementById('admin-date-filter').value;
             let targetDataset = [...globalResultsCache];
-            
             if(targetDate !== "all") {
                 targetDataset = globalResultsCache.filter(item => item.submissionDate === targetDate);
             }
-            
-            if(targetDataset.length === 0) {
-                alert("No structural analytics metrics registry active to complete Excel compilation sequences.");
-                return;
-            }
+            if(targetDataset.length === 0) return;
 
             targetDataset.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
 
-            let csvRows = ["Rank,Student Name,Email,Contact No,Score Raw,Percentage,Tab Switch Violations,Submission Date"];
+            // Added hidden space escape sequence (\t) to keep raw score fractions protected from auto-converting
+            let csvRows = ["Rank,Test Title,Student Name,Email,Contact No,Score Raw,Percentage,Tab Switch Violations,Submission Date"];
             targetDataset.forEach((row, index) => {
-                csvRows.push(`"${index + 1}","${row.studentName}","${row.studentEmail || 'N/A'}","${row.studentPhone || 'N/A'}","${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`);
+                csvRows.push(`"${index + 1}","${row.testTitle || 'N/A'}","${row.studentName}","\t${row.studentEmail || 'N/A'}","\t${row.studentPhone || 'N/A'}","\t${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`);
             });
 
             const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
@@ -717,7 +835,7 @@
             document.body.removeChild(downloaderAnchor);
         }
 
-        // --- STUDENT RUNTIME PIPELINES ---
+        // --- STUDENT RUNTIME OPERATIONS ---
         function compileStudentNavigationConsole() {
             const quizID = currentQuizDatabaseID || 'preview';
             localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections));
@@ -756,8 +874,16 @@
 
         function renderActiveQuestionViewport() {
             const currentItemRecord = masterRecordsArray[executionPointer];
-            document.getElementById('question-index-label').innerText = `Question ${executionPointer + 1} of ${masterRecordsArray.length}`;
             
+            // NAYA FEATURE: Toggle structural category runtime badge mapping dynamically
+            const catBadge = document.getElementById('std-category-badge');
+            if(currentItemRecord.Category && currentItemRecord.Category.trim() !== "") {
+                catBadge.innerText = `Category: ${currentItemRecord.Category.trim()}`;
+                catBadge.classList.remove('hidden');
+            } else {
+                catBadge.classList.add('hidden');
+            }
+
             const imageWrapperElement = document.getElementById('std-img-frame');
             const imgPayloadNode = document.getElementById('std-img-payload');
             if(currentItemRecord.ImageUrl && currentItemRecord.ImageUrl.trim() !== "") {
@@ -896,6 +1022,11 @@
             const quizID = currentQuizDatabaseID || 'preview';
             localStorage.removeItem('isStudentRuntimeActive_' + quizID);
 
+            const lastSavedName = localStorage.getItem('last_entered_name_' + quizID);
+            if(lastSavedName) {
+                localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
+            }
+
             let incrementalCorrectCounter = 0;
             let incrementalWrongCounter = 0;
             let incrementalUnattemptedCounter = 0;
@@ -915,12 +1046,12 @@
 
             const rawCalculatedPercentage = Math.round((incrementalCorrectCounter / masterRecordsArray.length) * 100);
 
-            // Constructing string date layouts context tracking schemas
             const dateObj = new Date();
             const formattedDateString = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
             if(currentQuizDatabaseID && currentQuizDatabaseID !== "") {
                 const analyticsNodePayload = {
+                    testTitle: globalTestMeta.name || "General Mock Test",
                     studentName: studentProfile.name || "Anonymous",
                     studentEmail: studentProfile.email || "N/A",
                     studentPhone: studentProfile.phone || "N/A",
@@ -983,7 +1114,7 @@
             document.getElementById('share-modal').classList.add('hidden');
         });
 
-        // Anti-Cheating Key Blocks
+        // Anti-Cheating Key Blocks Loop
         document.addEventListener('contextmenu', event => event.preventDefault()); 
 
         document.addEventListener('keydown', (e) => {
