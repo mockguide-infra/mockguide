@@ -123,9 +123,12 @@
 
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center space-y-1">
                     <h2 id="live-running-test-name" class="text-3xl font-black text-gray-900 tracking-tight">Mock Test</h2>
-                    <div class="w-24 h-1 bg-rose-500 mx-auto mt-2 rounded"></div>
+                    <p class="text-sm font-bold text-rose-500 tracking-wide font-mono">
+                        <i class="fa-regular fa-clock mr-1"></i> Time Remaining: <span id="sync-sub-clock">02:00:00</span>
+                    </p>
+                    <div class="w-24 h-0.5 bg-gray-100 mx-auto pt-1"></div>
                 </div>
 
                 <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm min-h-[420px] flex flex-col justify-between">
@@ -214,10 +217,10 @@
                 </div>
                 
                 <div class="pt-4">
-    <button onclick="window.close();" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm">
-        <i class="fa-solid fa-rectangle-xmark mr-1.5"></i> Close Window
-    </button>
-</div>
+                    <button onclick="window.close();" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-rectangle-xmark mr-1.5"></i> Close Window
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -232,9 +235,9 @@
             <p class="text-xs text-gray-400">ClassMarker style miniature database URL created. Share it with your students.</p>
             <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 p-2.5 rounded-lg">
                 <input type="text" id="share-url-string" readonly class="bg-transparent text-xs font-mono text-gray-600 flex-1 focus:outline-none" />
-                <button id="copy-url-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0">Copy Link</button>
+                <button id="copy-url-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0 cursor-pointer">Copy Link</button>
             </div>
-            <button id="close-share-modal" class="text-xs font-bold tracking-wider uppercase text-gray-400 hover:text-gray-600 pt-2 block mx-auto">Dismiss View</button>
+            <button id="close-share-modal" class="text-xs font-bold tracking-wider uppercase text-gray-400 hover:text-gray-600 pt-2 block mx-auto cursor-pointer">Dismiss View</button>
         </div>
     </div>
 
@@ -243,7 +246,7 @@
             <div>
                 <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                     <h3 class="font-bold text-gray-900 text-md flex items-center"><i class="fa-solid fa-folder-tree text-blue-600 mr-2"></i> All Questions Matrix Overview</h3>
-                    <button id="close-all-q-modal" class="text-gray-400 hover:text-gray-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+                    <button id="close-all-q-modal" class="text-gray-400 hover:text-gray-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div id="all-q-modal-list" class="space-y-2.5 overflow-y-auto max-h-[75vh] pr-1"></div>
             </div>
@@ -252,6 +255,7 @@
     </div>
 
     <script>
+        // --- LIVE CLOUD DATABASE INTEGRATION KEYS ---
         const firebaseConfig = {
             apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
             authDomain: "mockguide-62695.firebaseapp.com",
@@ -277,28 +281,12 @@
             if(isStudentRuntimeActive) {
                 alert("Navigation locked! You cannot exit during an active examination window.");
             } else {
-                clearAndReload();
+                localStorage.clear();
+                location.href = window.location.pathname;
             }
         }
 
-        function clearAndReload() {
-            localStorage.clear();
-            location.href = window.location.pathname;
-        }
-
-        // CSV Template Download Logic
-        function downloadCSVTemplate() {
-            const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", "MockGuide_Template.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Parse query parameters sequence and lock page memory refresh states
+        // Parse query URL routing (?quiz=ID)
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
             const targetedQuizID = URLParameters.get('quiz');
@@ -312,7 +300,6 @@
                             globalTestMeta.name = packageData.testName || "General Mock Test";
                             globalTestMeta.duration = parseInt(packageData.testDuration) || 120;
 
-                            // Lock check system using localstorage memory reload algorithms
                             const savedRuntimeActiveStatus = localStorage.getItem('isStudentRuntimeActive_' + targetedQuizID);
                             if (savedRuntimeActiveStatus === 'true') {
                                 isStudentRuntimeActive = true;
@@ -360,7 +347,18 @@
             transitionToStudentRuntime();
         });
 
-        // --- ADMIN CONTROLLERS ---
+        // --- ADMINISTRATIVE CONFIGURATIONS ---
+        function downloadCSVTemplate() {
+            const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "MockGuide_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
@@ -473,6 +471,7 @@
             }
         };
 
+        // 100% Core Fixed Generate Cloud Link System Button
         document.getElementById('generate-link-btn').addEventListener('click', () => {
             if(masterRecordsArray.length === 0) return;
             
@@ -498,11 +497,27 @@
                 })
                 .catch((error) => {
                     btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
-                    alert("Cloud operations saving error: " + error.message);
+                    alert("Cloud saving engine parameters block error: " + error.message);
                 });
         });
 
-document.getElementById('close-share-modal').addEventListener('click', () => {
+        // Copy and Dismiss View Modal Engine Event Actions Fully Wired
+        document.getElementById('copy-url-btn').addEventListener('click', () => {
+            const copyInputTarget = document.getElementById('share-url-string');
+            copyInputTarget.select();
+            document.execCommand('copy'); // Fail-safe fallback native mechanism
+            navigator.clipboard.writeText(copyInputTarget.value);
+            
+            const btnRef = document.getElementById('copy-url-btn');
+            btnRef.innerText = "Copied!";
+            btnRef.className = "bg-green-600 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
+            setTimeout(() => {
+                btnRef.innerText = "Copy Link";
+                btnRef.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
+            }, 1500);
+        });
+
+        document.getElementById('close-share-modal').addEventListener('click', () => {
             document.getElementById('share-modal').classList.add('hidden');
         });
 
@@ -528,9 +543,8 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
             triggerSystemClockTicker();
         }
 
-        // --- STUDENT RUNTIME OPERATIONS ---
+        // --- STUDENT RUNTIME OPERATIONS ENGINE ---
         function compileStudentNavigationConsole() {
-            // Backup session state variables layout inside LocalStorage memory nodes
             const URLParameters = new URLSearchParams(window.location.search);
             const quizID = URLParameters.get('quiz') || 'preview';
             localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections));
@@ -547,7 +561,7 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
 
             masterRecordsArray.forEach((_, idx) => {
                 const matrixBoxElement = document.createElement('button');
-                matrixBoxElement.className = "text-center py-2 text-xs font-bold rounded border transition-all duration-100 ";
+                matrixBoxElement.className = "text-center py-2 text-xs font-bold rounded border transition-all duration-100 cursor-pointer ";
                 
                 if(idx === executionPointer) {
                     matrixBoxElement.className += "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-100 font-extrabold";
@@ -604,10 +618,10 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
             document.getElementById('nav-action-back').disabled = (executionPointer === 0);
             if(executionPointer === masterRecordsArray.length - 1) {
                 document.getElementById('nav-action-forward').innerHTML = `Finish Test <i class="fa-solid fa-flag-checkered ml-1.5"></i>`;
-                document.getElementById('nav-action-forward').className = "bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm";
+                document.getElementById('nav-action-forward').className = "bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm cursor-pointer";
             } else {
                 document.getElementById('nav-action-forward').innerHTML = `Submit & Next <i class="fa-solid fa-arrow-right ml-1.5"></i>`;
-                document.getElementById('nav-action-forward').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm";
+                document.getElementById('nav-action-forward').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm cursor-pointer";
             }
         }
 
@@ -678,7 +692,6 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
             countdownTimerObject = setInterval(() => {
                 timeBudgetSeconds--;
                 
-                // Realtime sync time left back to localStorage cache track
                 const URLParameters = new URLSearchParams(window.location.search);
                 const quizID = URLParameters.get('quiz') || 'preview';
                 localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
@@ -686,8 +699,8 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
                 if(timeBudgetSeconds <= 0) {
                     clearInterval(countdownTimerObject);
                     document.getElementById('std-clock-readout').innerText = "00:00:00";
+                    document.getElementById('sync-sub-clock').innerText = "00:00:00";
                     
-                    // Time over explicitly requested text alert pattern hook
                     alert("Time over! Click OK to see your result.");
                     evaluateAndPublishScoreboard();
                 } else {
@@ -695,7 +708,11 @@ document.getElementById('close-share-modal').addEventListener('click', () => {
                     const minutesParameter = Math.floor((timeBudgetSeconds % 3600) / 60);
                     const secondsParameter = timeBudgetSeconds % 60;
 
-                    document.getElementById('std-clock-readout').innerText = `${String(hoursParameter).padStart(2, '0')}:${String(minutesParameter).padStart(2, '0')}:${String(secondsParameter).padStart(2, '0')}`;
+                    const formattedTimeString = `${String(hoursParameter).padStart(2, '0')}:${String(minutesParameter).padStart(2, '0')}:${String(secondsParameter).padStart(2, '0')}`;
+                    
+                    // Clocks synchronous double assignment string variables
+                    document.getElementById('std-clock-readout').innerText = formattedTimeString;
+                    document.getElementById('sync-sub-clock').innerText = formattedTimeString;
                 }
             }, 1000);
         }
