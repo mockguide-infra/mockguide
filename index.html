@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MockGuide - Ultimate Testing Platform</title>
+    <!-- Dependencies Libraries Links -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Core Libraries Integration -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <style>
         html { scroll-behavior: smooth; }
         .grid-box { transition: all 0.2s ease; }
@@ -14,9 +20,11 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Header Panel -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="location.href=window.location.pathname">
+            <!-- Smart Logo Router (Blocks navigation if student mode is active) -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="handleLogoClick()">
                 <i class="fa-solid fa-square-poll-horizontal text-3xl text-blue-600"></i>
                 <span class="text-xl font-bold tracking-tight text-gray-900">Mock<span class="text-blue-600">Guide</span></span>
             </div>
@@ -30,8 +38,10 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
+        <!-- ================= ADMIN ZONE ================= -->
         <div id="admin-zone" class="space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- CSV Upload -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 1: Batch Upload via CSV</h3>
                     <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
@@ -42,10 +52,11 @@
                         <input type="file" id="csv-uploader" accept=".csv" class="hidden" />
                     </label>
                 </div>
+                <!-- Manual Direct Insertion -->
                 <div class="space-y-3 flex flex-col justify-between">
                     <div>
                         <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 2: Manual Direct Insertion</h3>
-                        <p class="text-xs text-gray-500 mt-2">Add individual technical mock questions instantly directly into the database stack without any external file dependency.</p>
+                        <p class="text-xs text-gray-500 mt-2">Add individual mock questions instantly directly into the database stack without any external file dependency.</p>
                     </div>
                     <button id="manual-add-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg text-sm transition shadow-sm flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-plus-circle"></i> <span>Insert Question Manually</span>
@@ -53,6 +64,7 @@
                 </div>
             </div>
 
+            <!-- Editor Engine Roster Pipeline -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 gap-4">
                     <div>
@@ -73,8 +85,9 @@
             </div>
         </div>
 
-
+        <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Panel: Question Delivery -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm min-h-[420px] flex flex-col justify-between">
                     <div>
@@ -111,6 +124,7 @@
                 </div>
             </div>
 
+            <!-- Right Panel: Diagnostics Watchtower -->
             <div class="space-y-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Time Remaining</h3>
@@ -124,7 +138,7 @@
             </div>
         </div>
 
-
+        <!-- ================= ANALYTICS SCOREBOARD PANEL ================= -->
         <div id="results-zone" class="hidden space-y-8 max-w-4xl mx-auto">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                 <h2 class="text-xl font-bold tracking-tight text-gray-900 uppercase">Test Result Dashboard</h2>
@@ -172,13 +186,15 @@
 
     </main>
 
+    <!-- ================= INTERACTIVE MODALS ================= -->
+    <!-- Share Link Modal Window -->
     <div id="share-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl border border-gray-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100">
                 <i class="fa-solid fa-link"></i>
             </div>
             <h3 class="text-lg font-bold text-gray-900">Shareable Mock Link Active</h3>
-            <p class="text-xs text-gray-400">Copy this shortened clean URL link and propagate directly to students. No external account setup required by end-user.</p>
+            <p class="text-xs text-gray-400">ClassMarker style mini URL created successfully. Share it directly with your students.</p>
             
             <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 p-2.5 rounded-lg">
                 <input type="text" id="share-url-string" readonly class="bg-transparent text-xs font-mono text-gray-600 flex-1 focus:outline-none" />
@@ -188,6 +204,7 @@
         </div>
     </div>
 
+    <!-- See All Questions Dropdown Drawer -->
     <div id="all-questions-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-end z-50">
         <div class="bg-white h-full w-full max-w-md shadow-2xl p-6 flex flex-col justify-between border-l border-gray-100">
             <div>
@@ -201,62 +218,80 @@
         </div>
     </div>
 
+    <!-- ================= JAVASCRIPT SYSTEM ENGINE ================= -->
     <script>
+        // --- YOUR FIREBASE CONFIGURATION COUPLING ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
+            authDomain: "mockguide-62695.firebaseapp.com",
+            databaseURL: "https://mockguide-62695-default-rtdb.firebaseio.com",
+            projectId: "mockguide-62695",
+            storageBucket: "mockguide-62695.firebasestorage.app",
+            messagingSenderId: "751219838978",
+            appId: "1:751219838978:web:3529650f221e6a91f9571b"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const databaseRef = firebase.database();
+
         let masterRecordsArray = [];
         let executionPointer = 0;
         let countdownTimerObject = null;
         let timeBudgetSeconds = 120 * 60;
         let trackedClientSelections = {};
+        let isStudentRuntimeActive = false;
 
-        // Special Character Sanitizer (Fixes the  Diamond Symbol Bug)
-        function sanitizeText(text) {
-            if (!text) return "";
-            return text
-                .replace(/[\uFFFD\u00EF\u00BF\u00BD]/g, "") // Wipe corrupt byte chunks
-                .replace(/\?/g, (match, offset, string) => {
-                    // Smart fix: If it looks like math operations pattern context, protect or replace it safely
-                    return "?"; 
-                });
+        // Security Routing: Blocks logo redirection if student is taking a test
+        function handleLogoClick() {
+            if(isStudentRuntimeActive) {
+                alert("Navigation locked! You cannot exit or return to admin dashboard during an active examination window.");
+            } else {
+                location.href = window.location.pathname;
+            }
         }
 
-        // Deep Hook Check: URL check for encoded query data
+        // Deep Hook Check: URL parsing to detect ClassMarker-like '?quiz=ID' parameters
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
-            const encodedTestPayload = URLParameters.get('testData');
+            const targetedQuizID = URLParameters.get('quiz');
             
-            if (encodedTestPayload) {
-                try {
-                    masterRecordsArray = JSON.parse(decodeURIComponent(atob(encodedTestPayload)));
-                    if(masterRecordsArray.length > 0) {
-                        transitionToStudentRuntime();
-                    }
-                } catch(err) {
-                    alert("Invalid or corrupt metadata parameters structural payload found inside connection parameters sequence.");
-                }
+            if (targetedQuizID) {
+                // Fetch specific quiz structure from cloud locker instantly
+                databaseRef.ref('quizzes/' + targetedQuizID).once('value')
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            masterRecordsArray = snapshot.val();
+                            // Push dummy history frame to trap physical browser back button
+                            history.pushState(null, null, window.location.href);
+                            window.addEventListener('popstate', function () {
+                                history.pushState(null, null, window.location.href);
+                                alert("Strict Navigation Active: Use inside platform controls 'Previous' and 'Submit & Next' buttons to move around questions!");
+                            });
+                            transitionToStudentRuntime();
+                        } else {
+                            alert("Requested Exam ID reference record not found on live database registers.");
+                        }
+                    })
+                    .catch(() => {
+                        alert("Database configuration read sequence tracking aborted.");
+                    });
             }
         });
 
-        // --- ADMINISTRATIVE UTILITIES ENGINE ---
+        // --- ADMINISTRATIVE CORE MODULES ---
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
 
-            // Reading file with strict explicit UTF-8 Encoding to read special characters
             const fileReader = new FileReader();
-            fileReader.readAsText(rawFileNode, "UTF-8");
+            fileReader.readAsText(rawFileNode, "UTF-8"); 
             fileReader.onload = function (evt) {
-                const textDataStream = evt.target.result;
-                Papa.parse(textDataStream, {
+                Papa.parse(evt.target.result, {
                     header: true,
                     skipEmptyLines: true,
                     complete: function(outputMatrix) {
-                        // Apply special text clean sweeps arrays mapping logic
-                        masterRecordsArray = outputMatrix.data.map(row => {
-                            for (let key in row) {
-                                row[key] = sanitizeText(row[key]);
-                            }
-                            return row;
-                        });
+                        masterRecordsArray = outputMatrix.data;
                         syncAdminEditormanifest();
                     }
                 });
@@ -279,13 +314,12 @@
             masterRecordsArray.push(mockEntryBlueprint);
             syncAdminEditormanifest();
 
-            // Auto Scroll and Focus Engine Action Sequence Trigger
             setTimeout(() => {
                 const newestTargetCardNode = document.getElementById(`editor-card-container-${masterRecordsArray.length - 1}`);
                 if(newestTargetCardNode) {
                     newestTargetCardNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     newestTargetCardNode.classList.add('ring-2', 'ring-emerald-500', 'duration-500');
-                    setTimeout(() => newestTargetCardNode.classList.remove('ring-2', 'ring-emerald-500'), 2000);
+                    setTimeout(() => newestTargetCardNode.classList.remove('ring-2', 'ring-emerald-500'), 1500);
                 }
             }, 100);
         });
@@ -317,10 +351,9 @@
 
                 nodeItem.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                        <span>DATABASE TARGET REFERENCE BLOCK RECORD INDEX ENTRY #${indexIdx + 1}</span>
+                        <span>DATABASE TARGET INDEX #${indexIdx + 1}</span>
                         <div class="flex items-center space-x-3">
                             <span class="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded">Weight: ${qItem.Points || 1} Pt</span>
-                            <!-- Naya Delete Button -->
                             <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded border border-red-200 transition flex items-center space-x-1 font-bold cursor-pointer">
                                 <i class="fa-solid fa-trash-can"></i> <span>Delete</span>
                             </button>
@@ -328,16 +361,16 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Raw Text String Content Parameters</label>
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Plain Text String Parameters</label>
                             <textarea onchange="mutateStorageCell(${indexIdx}, 'Question', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 h-20 resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none">${qItem.Question}</textarea>
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Resource Image External Web URL Link Link</label>
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Diagram Graphic URL Link</label>
                             <input type="text" placeholder="https://domain.com/assets/visual-graph.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Dynamic Choice Targets Matrix Setup</label>
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Choice Entry Matrices Allocation</label>
                             ${dynamicChoiceBlockRows}
                             <div class="flex items-center space-x-3 pt-1">
-                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Master Correct Evaluation Target Key:</span>
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Correct Evaluation Key:</span>
                                 <input type="text" maxlength="1" value="${qItem.Correct || ''}" onchange="mutateStorageCell(${indexIdx}, 'Correct', this.value.toUpperCase())" class="w-10 text-center text-xs font-bold border border-gray-300 rounded p-1 uppercase focus:ring-1 focus:ring-blue-500">
                             </div>
                         </div>
@@ -346,7 +379,12 @@
                 targetContainer.appendChild(nodeItem);
             });
         }
-window.deleteQuestionItem = function(targetIndex) {
+
+        window.mutateStorageCell = function(targetIdx, schemaKey, updatedValueString) {
+            masterRecordsArray[targetIdx][schemaKey] = updatedValueString;
+        };
+
+        window.deleteQuestionItem = function(targetIndex) {
             if(confirm("Are you sure you want to delete Question #" + (targetIndex + 1) + "?")) {
                 masterRecordsArray.splice(targetIndex, 1);
                 if(masterRecordsArray.length === 0) {
@@ -355,37 +393,30 @@ window.deleteQuestionItem = function(targetIndex) {
                 syncAdminEditormanifest();
             }
         };
-        window.mutateStorageCell = function(targetIdx, schemaKey, updatedValueString) {
-            masterRecordsArray[targetIdx][schemaKey] = updatedValueString;
-        };
 
-        // Advanced Link Optimization Engine (TinyURL API Integration Code Loop)
-        document.getElementById('generate-link-btn').addEventListener('click', async () => {
+        // ClassMarker Style Mini-Link Generator (Stores structure data inside Firebase Cloud)
+        document.getElementById('generate-link-btn').addEventListener('click', () => {
             if(masterRecordsArray.length === 0) return;
             
             const btnText = document.getElementById('generate-link-btn');
-            btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Creating Link...</span>`;
+            btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Saving to Cloud...</span>`;
 
-            const base64PacketString = btoa(encodeURIComponent(JSON.stringify(masterRecordsArray)));
-            const massiveBaseUrl = `${window.location.origin}${window.location.pathname}?testData=${base64PacketString}`;
+            // Create a randomized premium miniature exam ID tag code
+            const uniqueQuizID = "Quiz_" + Math.floor(1000 + Math.random() * 9000);
             
-            try {
-                // Call TinyURL open endpoint gateway cleanly via fetch asynchronous matrix pipelines
-                const apiGatewayEndpoint = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(massiveBaseUrl)}`;
-                const responseInstance = await fetch(apiGatewayEndpoint);
+            // Put full dynamic array structure into cloud database locker reference node
+            databaseRef.ref('quizzes/' + uniqueQuizID).set(masterRecordsArray, (error) => {
+                btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
                 
-                if(responseInstance.ok) {
-                    const shortenedCleanUrlString = await responseInstance.text();
-                    document.getElementById('share-url-string').value = shortenedCleanUrlString;
+                if (error) {
+                    alert("Cloud initialization pipeline encountered network transmission drops.");
                 } else {
-                    document.getElementById('share-url-string').value = massiveBaseUrl; // Fallback to raw string if connection times out
+                    // Generate clean miniature link structure matching standard systems
+                    const shortMiniatureLiveUrl = `${window.location.origin}${window.location.pathname}?quiz=${uniqueQuizID}`;
+                    document.getElementById('share-url-string').value = shortMiniatureLiveUrl;
+                    document.getElementById('share-modal').classList.remove('hidden');
                 }
-            } catch (err) {
-                document.getElementById('share-url-string').value = massiveBaseUrl;
-            }
-
-            btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
-            document.getElementById('share-modal').classList.remove('hidden');
+            });
         });
 
         document.getElementById('copy-url-btn').addEventListener('click', () => {
@@ -411,6 +442,7 @@ window.deleteQuestionItem = function(targetIndex) {
         });
 
         function transitionToStudentRuntime() {
+            isStudentRuntimeActive = true;
             document.getElementById('admin-zone').classList.add('hidden');
             document.getElementById('role-badge').innerText = "Student Mode Active";
             document.getElementById('role-badge').className = "bg-green-50 text-green-700 text-xs px-3 py-1.5 rounded-full font-bold border border-green-200";
@@ -420,7 +452,7 @@ window.deleteQuestionItem = function(targetIndex) {
             triggerSystemClockTicker();
         }
 
-        // --- STUDENT ENGINE OPERATIONS WINDOW ---
+        // --- STUDENT RUNTIME PORTAL CONTROLLERS ---
         function compileStudentNavigationConsole() {
             renderStudentMatrixDock();
             renderActiveQuestionViewport();
@@ -522,7 +554,7 @@ window.deleteQuestionItem = function(targetIndex) {
             }
         });
 
-        // See All Questions List Generation Logic
+        // See All Dynamic List Modal Engine View
         document.getElementById('modal-trigger-link').addEventListener('click', () => {
             const listFrameElement = document.getElementById('all-q-modal-list');
             listFrameElement.innerHTML = "";
@@ -578,9 +610,10 @@ window.deleteQuestionItem = function(targetIndex) {
             }, 1000);
         }
 
-        // --- COMPUTATION EVALUATION MATRIX SYSTEM ---
+        // --- COMPUTATION EVALUATION SUMMARY ---
         function evaluateAndPublishScoreboard() {
             clearInterval(countdownTimerObject);
+            isStudentRuntimeActive = false; // Release lock state logic
             
             let incrementalCorrectCounter = 0;
             let incrementalWrongCounter = 0;
