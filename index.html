@@ -8,14 +8,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Core Libraries Connection Links -->
+    <!-- Firebase Core Libraries Connection -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
         html { scroll-behavior: smooth; }
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
@@ -42,32 +41,67 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- ================= ADMIN GATEWAY SECURITY AUTH PORTAL ================= -->
-        <div id="auth-gate-zone" class="max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
+        <!-- ================= SIGN IN WINDOW LAYOUT ================= -->
+        <div id="auth-login-zone" class="max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
             <div class="text-center space-y-2">
                 <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl mx-auto border border-blue-100"><i class="fa-solid fa-shield-halved"></i></div>
-                <h2 id="auth-title-label" class="text-xl font-black tracking-tight text-slate-900">Sign In to Dashboard</h2>
-                <p class="text-xs text-slate-400 font-medium">Authentication protocol verification required.</p>
+                <h2 class="text-xl font-black tracking-tight text-slate-900">Sign In to Dashboard</h2>
+                <p class="text-xs text-slate-400 font-medium">Authentication credentials verification required.</p>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1">Administrator Username</label>
-                    <input type="text" id="auth-username" placeholder="Enter username string" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    <input type="text" id="login-username" placeholder="Enter username string" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1">Access Security Key</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
                 </div>
-                <div class="pt-2 space-y-3">
-                    <button onclick="executeAdminAuthentication('login')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md shadow-blue-200 transition">Authorize Session Login</button>
-                    <button onclick="executeAdminAuthentication('signup')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-lg text-xs transition">Create Administrator Registry Node</button>
+                <div class="pt-2 space-y-4">
+                    <button onclick="executeLoginSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md shadow-blue-200 transition">Authorize Session Login</button>
+                    <div class="text-center">
+                        <button onclick="switchAuthView('signup')" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition">New Administrator? Create Registry Node here →</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ================= MODERNISED ADMIN EXECUTIVE WORKSPACE ================= -->
-        <div id="admin-zone" class="hidden space-y-6 animate-[fadeIn_0.4s_ease-out]">
-            <!-- Global Structural Configurations Block Row -->
+        <!-- ================= SIGN UP WINDOW LAYOUT (ALAG SEPARATE VIEW) ================= -->
+        <div id="auth-signup-zone" class="hidden max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-xl mx-auto border border-purple-100"><i class="fa-solid fa-user-plus"></i></div>
+                <h2 class="text-xl font-black tracking-tight text-slate-900">Create Admin Account</h2>
+                <p class="text-xs text-slate-400 font-medium">Register structural administrative ownership profiles.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Full Name</label>
+                    <input type="text" id="signup-fullname" placeholder="Enter your full name" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Organization / Brand Name</label>
+                    <input type="text" id="signup-brand" placeholder="e.g., HereAndAll Enterprises" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Desired Username String</label>
+                    <input type="text" id="signup-username" placeholder="Choose unique username" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Access Password</label>
+                    <input type="password" id="signup-password" placeholder="••••••••" class="w-full text-sm border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                </div>
+                <div class="pt-2 space-y-4">
+                    <button onclick="executeSignupSession()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg shadow-md shadow-purple-200 transition">Register Administrator Profile</button>
+                    <div class="text-center">
+                        <button onclick="switchAuthView('login')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 transition">← Already registered? Return to Log In</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN EXECUTIVE WORKSPACE ================= -->
+        <div id="admin-zone" class="hidden space-y-6">
+            <!-- Global Specifications Blueprint Box -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-3">
                     <h3 class="text-md font-bold text-slate-900 flex items-center"><i class="fa-solid fa-sliders text-blue-600 mr-2"></i>Global Examination Blueprint Framework Parameters</h3>
@@ -88,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Modern Dropdown Unified Input Feed Dock -->
+            <!-- Unified Dropdown Accordion Feed Dock -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider border-b border-slate-100 pb-2"><i class="fa-solid fa-right-to-bracket text-slate-400 mr-1.5"></i>Input Sourcing Interface</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -118,22 +152,22 @@
                     </div>
                 </div>
 
-                <!-- SELECTIVE IMPORT SYSTEM WINDOW OVERVIEW -->
-                <div id="bank-selective-checklist-wrapper" class="hidden border border-purple-100 rounded-xl bg-purple-50/30 p-4 space-y-3 animate-[fadeIn_0.3s_ease-out]">
+                <!-- SELECTIVE CHECKLIST SYSTEM PANEL OVERVIEW -->
+                <div id="bank-selective-checklist-wrapper" class="hidden border border-purple-100 rounded-xl bg-purple-50/30 p-4 space-y-3">
                     <div class="flex justify-between items-center border-b border-purple-100 pb-2">
                         <h4 class="text-xs font-black text-purple-800 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Choose items from Central Vault Matrix</h4>
-                        <button onclick="executeSelectiveBankImport()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded transition">Import Selected Array Rows</button>
+                        <button onclick="executeSelectiveBankImport()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">Import Selected Array Rows</button>
                     </div>
                     <div class="overflow-y-auto max-h-48 divide-y divide-purple-100 pr-1" id="bank-selective-checklist-container"></div>
                 </div>
             </div>
 
-            <!-- Active Layout Management Queue Panel Roster -->
+            <!-- Active Storage Queue Manifest -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 gap-4">
                     <div>
                         <h3 class="text-md font-bold text-slate-900"><i class="fa-solid fa-layer-group text-blue-600 mr-2"></i>Database Storage Queue</h3>
-                        <p class="text-xs text-slate-400">Review, append, or patch questions structure before executing link propagation.</p>
+                        <p class="text-xs text-slate-400">Review, append, or patch questions structure before link generation.</p>
                     </div>
                     <div class="flex space-x-3">
                         <button id="generate-link-btn" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition flex items-center space-x-2"><i class="fa-solid fa-link"></i> <span>Create Test Link</span></button>
@@ -173,8 +207,6 @@
                         <tbody id="admin-results-tbody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
-                
-                <!-- NAYA FEATURE: Sticky back towards header view configuration loop pointer selector anchor -->
                 <div class="flex justify-end pt-2">
                     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-slate-400 hover:text-blue-600 text-xs font-bold flex items-center space-x-1 transition"><i class="fa-solid fa-circle-arrow-up text-lg"></i> <span>Scroll Back To Dashboard Top</span></button>
                 </div>
@@ -209,7 +241,6 @@
         <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <!-- Large Bold Title Layout Box with Sub-Clock Timer -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-1">
                     <h2 id="live-running-test-name" class="text-3xl font-black text-slate-900 tracking-tight">Mock Test</h2>
                     <p class="text-sm font-bold text-rose-500 tracking-wide font-mono"><i class="fa-regular fa-clock mr-1"></i> Time Remaining: <span id="sync-sub-clock">02:00:00</span></p>
@@ -304,7 +335,7 @@
 
     </main>
 
-    <!-- Modal Elements for share live links operations parameters check modules -->
+    <!-- Modals definitions wrapper systems panels check hooks -->
     <div id="share-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl border border-slate-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100"><i class="fa-solid fa-link"></i></div>
@@ -330,19 +361,78 @@
     </div>
 
     <script>
-        let masterRecordsArray = [];
-        let executionPointer = 0;
-        let countdownTimerObject = null;
-        let timeBudgetSeconds = 120 * 60; 
-        let trackedClientSelections = {};
-        let isStudentRuntimeActive = false;
-        let globalTestMeta = { name: "General Mock Test", duration: 120 };
+        // --- LIVE CLOUD ROUTING CORE ENGINE CONFIGS ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
+            authDomain: "mockguide-62695.firebaseapp.com",
+            databaseURL: "https://mockguide-62695-default-rtdb.firebaseio.com",
+            projectId: "mockguide-62695",
+            storageBucket: "mockguide-62695.firebasestorage.app",
+            messagingSenderId: "751219838978",
+            appId: "1:751219838978:web:3529650f221e6a91f9571b"
+        };
         
-        let currentQuizDatabaseID = "";
-        let studentProfile = { name: "", email: "", phone: "" };
-        let proctorTabSwitchCount = 0;
-        let globalResultsCache = [];
-        let loadedBankQuestionsCache = []; // Holding selective checked list rows array configurations
+        firebase.initializeApp(firebaseConfig);
+        const databaseRef = firebase.database();
+
+        // Separate view dynamic panel shifting function anchor loop
+        function switchAuthView(panelMode) {
+            if(panelMode === 'signup') {
+                document.getElementById('auth-login-zone').classList.add('hidden');
+                document.getElementById('auth-signup-zone').classList.remove('hidden');
+            } else {
+                document.getElementById('auth-signup-zone').classList.add('hidden');
+                document.getElementById('auth-login-zone').classList.remove('hidden');
+            }
+        }
+
+        // 100% Fixed Separate signup submission function node workflow loop
+        function executeSignupSession() {
+            const fullName = document.getElementById('signup-fullname').value.trim();
+            const brandName = document.getElementById('signup-brand').value.trim();
+            const userKey = document.getElementById('signup-username').value.trim().toLowerCase();
+            const passKey = document.getElementById('signup-password').value.trim();
+
+            if(!fullName || !brandName || !userKey || !passKey) {
+                alert("Please fill all professional parameter field inputs.");
+                return;
+            }
+
+            databaseRef.ref('admin_users/' + userKey).set({
+                adminFullName: fullName,
+                companyBrandName: brandName,
+                accessKey: passKey
+            }).then(() => {
+                alert("Administrative Registry Node configured successfully. Returning to Login screen.");
+                switchAuthView('login');
+                // Clear fields values metrics parameters loops 
+                document.getElementById('signup-fullname').value = "";
+                document.getElementById('signup-brand').value = "";
+                document.getElementById('signup-username').value = "";
+                document.getElementById('signup-password').value = "";
+            }).catch(() => alert("Cloud infrastructure network authentication failure."));
+        }
+
+        // 100% Fixed Separate dynamic verification logic check mechanism
+        function executeLoginSession() {
+            const user = document.getElementById('login-username').value.trim().toLowerCase();
+            const pass = document.getElementById('login-password').value.trim();
+            if(!user || !pass) { alert("Enter matching operational credentials parameters."); return; }
+
+            databaseRef.ref('admin_users/' + user).once('value').then((snapshot) => {
+                if(snapshot.exists() && snapshot.val().accessKey === pass) {
+                    document.getElementById('auth-login-zone').classList.add('hidden');
+                    document.getElementById('role-badge').innerHTML = `<i class="fa-solid fa-unlock text-emerald-500"></i> Active Session`;
+                    document.getElementById('role-badge').className = "bg-emerald-50 text-emerald-700 text-xs px-3 py-2 rounded-full font-bold border border-emerald-200";
+                    document.getElementById('admin-zone').classList.remove('hidden');
+                    
+                    fetchAndRenderAdminLeaderboard();
+                    syncBankCategoryDropdown();
+                } else {
+                    alert("Invalid administrator username or verification passcode keys.");
+                }
+            });
+        }
 
         function toggleMethodSubpanels() {
             const val = document.getElementById('admin-method-dropdown').value;
@@ -355,39 +445,12 @@
             if(val === 'bank') document.getElementById('subpanel-bank').classList.remove('hidden');
         }
 
-        // --- NEW SECURITY AUTHENTICATION REGISTRY CORE LOOP ---
-        function executeAdminAuthentication(mode) {
-            const user = document.getElementById('auth-username').value.trim();
-            const pass = document.getElementById('auth-password').value.trim();
-            if(!user || !pass) { alert("Complete credentials parameter validation cells."); return; }
-
-            if(mode === 'signup') {
-                databaseRef.ref('admin_users/' + user).set({ accessKey: pass })
-                    .then(() => alert("Administrator node registered successfully. Authorize session loop now."))
-                    .catch(() => alert("Cloud communication write rejected parameters error."));
-            } else {
-                databaseRef.ref('admin_users/' + user).once('value').then((snapshot) => {
-                    if(snapshot.exists() && snapshot.val().accessKey === pass) {
-                        document.getElementById('auth-gate-zone').classList.add('hidden');
-                        document.getElementById('role-badge').innerHTML = `<i class="fa-solid fa-unlock text-emerald-500"></i> Session Active`;
-                        document.getElementById('role-badge').className = "bg-emerald-50 text-emerald-700 text-xs px-3 py-2 rounded-full font-bold border border-emerald-200";
-                        document.getElementById('admin-zone').classList.remove('hidden');
-                        fetchAndRenderAdminLeaderboard();
-                        syncBankCategoryDropdown();
-                    } else {
-                        alert("Invalid security registry values.");
-                    }
-                });
-            }
-        }
-
-        // URL query sync routing gate hooks sequence execution pointer allocation check
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
             const targetedQuizID = URLParameters.get('quiz');
             
             if (targetedQuizID) {
-                document.getElementById('auth-gate-zone').classList.add('hidden');
+                document.getElementById('auth-login-zone').classList.add('hidden');
                 currentQuizDatabaseID = targetedQuizID;
 
                 databaseRef.ref('live_quizzes/' + targetedQuizID).once('value')
@@ -422,13 +485,10 @@
             }
         });
 
-        // --- NEW SELECTIVE IMPORT SYSTEM MECHANICS WINDOW ---
         function loadBankQuestionsForSelectiveChecklist() {
             const cat = document.getElementById('bank-category-selector').value;
             const container = document.getElementById('bank-selective-checklist-container');
-            container.innerHTML = "";
-            loadedBankQuestionsCache = [];
-
+            container.innerHTML = ""; loadedBankQuestionsCache = [];
             if(!cat) return;
             document.getElementById('bank-selective-checklist-wrapper').classList.remove('hidden');
 
@@ -436,17 +496,14 @@
                 if(snapshot.exists()) {
                     let index = 0;
                     snapshot.forEach(child => {
-                        const q = child.val();
-                        loadedBankQuestionsCache.push(q);
-                        
+                        const q = child.val(); loadedBankQuestionsCache.push(q);
                         const row = document.createElement('label');
                         row.className = "flex items-center space-x-3 py-2 text-xs text-slate-700 cursor-pointer select-none hover:bg-purple-50/50 px-1 rounded transition";
                         row.innerHTML = `
                             <input type="checkbox" data-index="${index}" class="bank-item-checkbox w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500">
                             <span class="font-medium"><span class="text-purple-400 font-bold mr-1">#${index+1}</span> ${q.Question.substring(0,80)}...</span>
                         `;
-                        container.appendChild(row);
-                        index++;
+                        container.appendChild(row); index++;
                     });
                 }
             });
@@ -455,69 +512,39 @@
         function executeSelectiveBankImport() {
             const checkboxes = document.querySelectorAll('.bank-item-checkbox:checked');
             if(checkboxes.length === 0) { alert("Choose matching row nodes to trigger import sequences."); return; }
-
             checkboxes.forEach(cb => {
                 const idx = parseInt(cb.getAttribute('data-index'));
                 const targetObj = loadedBankQuestionsCache[idx];
                 if(targetObj) {
                     masterRecordsArray.push({
-                        "Question": targetObj.Question || "",
-                        "Correct": targetObj.Correct || "A",
-                        "Answer A": targetObj["Answer A"] || "",
-                        "Answer B": targetObj["Answer B"] || "",
-                        "Answer C": targetObj["Answer C"] || "",
-                        "Answer D": targetObj["Answer D"] || "",
-                        "Answer E": targetObj["Answer E"] || "",
-                        "Points": targetObj.Points || "1",
-                        "ImageUrl": targetObj.ImageUrl || "",
-                        "Category": targetObj.Category || ""
+                        "Question": targetObj.Question || "", "Correct": targetObj.Correct || "A", "Answer A": targetObj["Answer A"] || "", "Answer B": targetObj["Answer B"] || "", "Answer C": targetObj["Answer C"] || "", "Answer D": targetObj["Answer D"] || "", "Answer E": targetObj["Answer E"] || "", "Points": targetObj.Points || "1", "ImageUrl": targetObj.ImageUrl || "", "Category": targetObj.Category || ""
                     });
                 }
             });
-            
-            alert(`Successfully imported ${checkboxes.length} selected row objects directly into operational framework memory pipelines.`);
-            syncAdminEditormanifest();
-            // Reset state views indicators 
+            alert(`Imported ${checkboxes.length} records dynamically.`); syncAdminEditormanifest();
             document.querySelectorAll('.bank-item-checkbox').forEach(cb => cb.checked = false);
         }
 
-        // --- GLOBAL CSV TEMPLATE REPOSITORIES BUILD ---
         function downloadCSVTemplate(type) {
-            let csvContent = "";
-            let fileName = "";
+            let csvContent = ""; let fileName = "";
             if(type === 'quiz') {
-                csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,ImageUrl\nmultiplechoice,Generic Parent,Math,No,Well done!,Sorry,1,3571 + ? - 6086 = 155,A,2400,2630,2515,None of these,,";
-                fileName = "MockGuide_Quiz_Template.csv";
+                csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,ImageUrl\nmultiplechoice,Generic Parent,Math,No,Well done!,Sorry,1,3571 + ? - 6086 = 155,A,2400,2630,2515,None of these,,"; fileName = "MockGuide_Quiz_Template.csv";
             } else {
-                csvContent = "Category,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,Points,ImageUrl\nMath,Find missing parameter values inside matrix arrays,A,15,16,18,19,,1,";
-                fileName = "MockGuide_Bank_Template.csv";
+                csvContent = "Category,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,Points,ImageUrl\nMath,Find missing parameter values inside matrix arrays,A,15,16,18,19,,1,"; fileName = "MockGuide_Bank_Template.csv";
             }
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", fileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", fileName); document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
-        // --- CLOUD VAULT BANK PIPELINES ---
         document.getElementById('bank-csv-uploader').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.readAsText(file, "UTF-8");
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader(); reader.readAsText(file, "UTF-8");
             reader.onload = function(evt) {
                 Papa.parse(evt.target.result, {
-                    header: true,
-                    skipEmptyLines: true,
+                    header: true, skipEmptyLines: true,
                     complete: function(results) {
-                        results.data.forEach(item => {
-                            const cat = item.Category ? item.Category.trim() : "General";
-                            databaseRef.ref('question_bank/' + cat).push(item);
-                        });
-                        alert("Central warehouse nodes written live successfully.");
-                        syncBankCategoryDropdown();
+                        results.data.forEach(item => { const cat = item.Category ? item.Category.trim() : "General"; databaseRef.ref('question_bank/' + cat).push(item); });
+                        alert("Central warehouse nodes written live successfully."); syncBankCategoryDropdown();
                     }
                 });
             };
@@ -528,12 +555,7 @@
                 const selector = document.getElementById('bank-category-selector');
                 selector.innerHTML = '<option value="" disabled selected>-- Choose Category Vault Node --</option>';
                 if(snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const option = document.createElement('option');
-                        option.value = child.key;
-                        option.innerText = child.key;
-                        selector.appendChild(option);
-                    });
+                    snapshot.forEach(child => { const option = document.createElement('option'); option.value = child.key; option.innerText = child.key; selector.appendChild(option); });
                 }
             });
         }
@@ -548,7 +570,6 @@
             const nameInput = document.getElementById('std-input-name').value.trim();
             const emailInput = document.getElementById('std-input-email').value.trim();
             const phoneInput = document.getElementById('std-input-phone').value.trim();
-            
             if(!nameInput) { alert("Please enter your name to start the test."); return; }
 
             const quizID = currentQuizDatabaseID || 'preview';
@@ -557,42 +578,24 @@
             databaseRef.ref('quiz_results/' + quizID).once('value').then((snapshot) => {
                 let nameAlreadyExists = false;
                 if(snapshot.exists()) {
-                    snapshot.forEach((entry) => {
-                        if((entry.val().studentName || "").toLowerCase().trim() === lookupKeyName) { nameAlreadyExists = true; }
-                    });
+                    snapshot.forEach((entry) => { if((entry.val().studentName || "").toLowerCase().trim() === lookupKeyName) { nameAlreadyExists = true; } });
                 }
-
-                if(nameAlreadyExists) {
-                    alert("You have already attempted this test. Contact admin for further request.");
-                } else {
-                    studentProfile.name = nameInput;
-                    studentProfile.email = emailInput;
-                    studentProfile.phone = phoneInput;
-                    
-                    localStorage.setItem('isStudentRuntimeActive_' + quizID, 'true');
-                    localStorage.setItem('studentProfile_' + quizID, JSON.stringify(studentProfile));
-                    localStorage.setItem('last_entered_name_' + quizID, lookupKeyName);
-
-                    document.getElementById('student-gateway-zone').classList.add('hidden');
-                    transitionToStudentRuntime();
+                if(nameAlreadyExists) { alert("You have already attempted this test. Contact admin for further request."); }
+                else {
+                    studentProfile.name = nameInput; studentProfile.email = emailInput; studentProfile.phone = phoneInput;
+                    localStorage.setItem('isStudentRuntimeActive_' + quizID, 'true'); localStorage.setItem('studentProfile_' + quizID, JSON.stringify(studentProfile)); localStorage.setItem('last_entered_name_' + quizID, lookupKeyName);
+                    document.getElementById('student-gateway-zone').classList.add('hidden'); transitionToStudentRuntime();
                 }
             });
         });
 
-        // --- ADMINISTRATIVE QUEUE HANDLERS ---
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
-            const rawFileNode = e.target.files[0];
-            if (!rawFileNode) return;
-            const fileReader = new FileReader();
-            fileReader.readAsText(rawFileNode, "UTF-8"); 
+            const rawFileNode = e.target.files[0]; if (!rawFileNode) return;
+            const fileReader = new FileReader(); fileReader.readAsText(rawFileNode, "UTF-8"); 
             fileReader.onload = function (evt) {
                 Papa.parse(evt.target.result, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(outputMatrix) {
-                        masterRecordsArray = outputMatrix.data;
-                        syncAdminEditormanifest();
-                    }
+                    header: true, skipEmptyLines: true,
+                    complete: function(outputMatrix) { masterRecordsArray = outputMatrix.data; syncAdminEditormanifest(); }
                 });
             };
         });
@@ -600,22 +603,17 @@
         document.getElementById('manual-add-btn').addEventListener('click', () => {
             const newIndexID = masterRecordsArray.length + 1;
             masterRecordsArray.push({
-                "Question": "Question Statement Entry Reference Row #" + newIndexID,
-                "Correct": "A", "Answer A": "Option Alpha Placeholder text", "Answer B": "Option Beta Placeholder text", "Answer C": "", "Answer D": "", "Answer E": "", "Points": "1", "ImageUrl": "", "Category": ""
+                "Question": "Question Statement Entry Reference Row #" + newIndexID, "Correct": "A", "Answer A": "Option Alpha Placeholder text", "Answer B": "Option Beta Placeholder text", "Answer C": "", "Answer D": "", "Answer E": "", "Points": "1", "ImageUrl": "", "Category": ""
             });
             syncAdminEditormanifest();
         });
 
         function syncAdminEditormanifest() {
-            const targetContainer = document.getElementById('dynamic-editor-holder');
-            targetContainer.innerHTML = "";
+            const targetContainer = document.getElementById('dynamic-editor-holder'); targetContainer.innerHTML = "";
             if(masterRecordsArray.length > 0) document.getElementById('live-manifest-card').classList.remove('hidden');
 
             masterRecordsArray.forEach((qItem, indexIdx) => {
-                const nodeItem = document.createElement('div');
-                nodeItem.id = `editor-card-container-${indexIdx}`;
-                nodeItem.className = "py-6 first:pt-0 space-y-4 rounded-xl p-3 transition-all";
-                
+                const nodeItem = document.createElement('div'); nodeItem.id = `editor-card-container-${indexIdx}`; nodeItem.className = "py-6 first:pt-0 space-y-4 rounded-xl p-3 transition-all";
                 let dynamicChoiceBlockRows = "";
                 ['A', 'B', 'C', 'D', 'E'].forEach(letter => {
                     const rowKey = `Answer ${letter}`;
@@ -629,7 +627,7 @@
 
                 nodeItem.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-slate-400">
-                        <span>QUESTION ID CONFIG INDEX ENTRY #${indexIdx + 1}</span>
+                        <span>QUESTION CONFIG BLOCK ROW INDEX ENTRY #${indexIdx + 1}</span>
                         <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-lg border border-red-200 text-[11px] transition flex items-center space-x-1 font-bold cursor-pointer"><i class="fa-solid fa-trash-can"></i> <span>Delete</span></button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -656,34 +654,25 @@
         }
 
         window.mutateStorageCell = function(targetIdx, schemaKey, updatedValueString) { masterRecordsArray[targetIdx][schemaKey] = updatedValueString; };
+        window.deleteQuestionItem = function(targetIndex) { if(confirm("Are you sure?")) { masterRecordsArray.splice(targetIndex, 1); if(masterRecordsArray.length === 0) document.getElementById('live-manifest-card').classList.add('hidden'); syncAdminEditormanifest(); } };
 
-        // --- RE-ENGINEERED PERFORMANCE ANALYTICS WORKSPACE LOGGER SYSTEM ---
         function fetchAndRenderAdminLeaderboard() {
             databaseRef.ref('quiz_results').on('value', (snapshot) => {
-                globalResultsCache = [];
-                const selectFilter = document.getElementById('admin-date-filter');
-                selectFilter.innerHTML = '<option value="all">All Submission Dates</option>';
-                let dynamicDatesFoundSet = new Set();
+                globalResultsCache = []; const selectFilter = document.getElementById('admin-date-filter');
+                selectFilter.innerHTML = '<option value="all">All Submission Dates</option>'; let dynamicDatesFoundSet = new Set();
 
                 if (snapshot.exists()) {
                     document.getElementById('admin-results-card').classList.remove('hidden');
-                    document.getElementById('header-analytics-btn').classList.remove('hidden');
-                    document.getElementById('header-analytics-btn').classList.add('inline-flex');
+                    document.getElementById('header-analytics-btn').classList.remove('hidden'); document.getElementById('header-analytics-btn').classList.add('inline-flex');
                     
                     snapshot.forEach((childQuiz) => {
                         const quizIdKey = childQuiz.key;
                         childQuiz.forEach((entry) => {
-                            const data = entry.val();
-                            data.quizId = quizIdKey; data.entryKey = entry.key;
-                            globalResultsCache.push(data);
-                            if(data.submissionDate) dynamicDatesFoundSet.add(data.submissionDate);
+                            const data = entry.val(); data.quizId = quizIdKey; data.entryKey = entry.key;
+                            globalResultsCache.push(data); if(data.submissionDate) dynamicDatesFoundSet.add(data.submissionDate);
                         });
                     });
-                    
-                    Array.from(dynamicDatesFoundSet).sort().forEach(dateStr => {
-                        const opt = document.createElement('option');
-                        opt.value = dateStr; opt.innerText = dateStr; selectFilter.appendChild(opt);
-                    });
+                    Array.from(dynamicDatesFoundSet).sort().forEach(dateStr => { const opt = document.createElement('option'); opt.value = dateStr; opt.innerText = dateStr; selectFilter.appendChild(opt); });
                     renderLeaderboardRows(globalResultsCache);
                 }
             });
@@ -692,11 +681,9 @@
         function renderLeaderboardRows(dataset) {
             const tbody = document.getElementById('admin-results-tbody'); tbody.innerHTML = "";
             let sortedData = [...dataset]; sortedData.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
-            
             sortedData.forEach((row, rIdx) => {
                 const scoreColorClass = row.scorePercent >= 70 ? 'text-emerald-600 font-bold' : (row.scorePercent >= 50 ? 'text-amber-600 font-bold' : 'text-red-600 font-bold');
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition text-slate-700 border-b border-slate-100";
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition text-slate-700 border-b border-slate-100";
                 tr.innerHTML = `
                     <td class="p-3 font-bold text-slate-400">#${rIdx + 1}</td>
                     <td class="p-3 font-black text-blue-600">${row.testTitle || 'General Quiz'}</td>
@@ -706,91 +693,45 @@
                     <td class="p-3 text-center font-mono font-bold">${row.scoreRaw}</td>
                     <td class="p-3 text-center font-mono ${scoreColorClass}">${row.scorePercent}%</td>
                     <td class="p-3 text-center font-mono text-red-500 font-black">${row.tabSwitches || 0}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteSingleAnalyticsLog('${row.quizId}', '${row.entryKey}')" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 rounded border border-red-100 transition cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
+                    <td class="p-3 text-center"><button onclick="deleteSingleAnalyticsLog('${row.quizId}', '${row.entryKey}')" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 rounded border border-red-100 transition cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.deleteSingleAnalyticsLog = function(quizId, entryKey) {
-            if(confirm("Confirm structural deletion sequence parameter lock commands from cloud?")) {
-                databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove()
-                    .then(() => alert("Entry safely mityga."))
-                    .catch(() => alert("Network drops execution block error."));
-            }
-        };
-
-        function filterAnalyticsByDate() {
-            const targetDate = document.getElementById('admin-date-filter').value;
-            if(targetDate === "all") renderLeaderboardRows(globalResultsCache);
-            else renderLeaderboardRows(globalResultsCache.filter(item => item.submissionDate === targetDate));
-        }
+        window.deleteSingleAnalyticsLog = function(quizId, entryKey) { if(confirm("Confirm deletion execution layout keys parameter context commands from cloud?")) { databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove(); } };
+        function filterAnalyticsByDate() { const targetDate = document.getElementById('admin-date-filter').value; if(targetDate === "all") renderLeaderboardRows(globalResultsCache); else renderLeaderboardRows(globalResultsCache.filter(item => item.submissionDate === targetDate)); }
 
         function exportFilteredAnalyticsToCSV() {
             const targetDate = document.getElementById('admin-date-filter').value;
-            let targetDataset = (targetDate === "all") ? [...globalResultsCache] : globalResultsCache.filter(item => item.submissionDate === targetDate);
-            if(targetDataset.length === 0) return;
-
+            let targetDataset = (targetDate === "all") ? [...globalResultsCache] : globalResultsCache.filter(item => item.submissionDate === targetDate); if(targetDataset.length === 0) return;
             targetDataset.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
-            
-            // Fixed Escape dynamic spacing layout parameter (\t) blocks auto calculation loops inside excel cells format data sheets
             let csvRows = ["Rank,Test Title,Student Name,Email,Contact No,Score Raw,Percentage,Tab Switch Violations,Submission Date"];
-            targetDataset.forEach((row, index) => {
-                csvRows.push(`"${index + 1}","${row.testTitle || 'N/A'}","${row.studentName}","\t${row.studentEmail || 'N/A'}","\t${row.studentPhone || 'N/A'}","\t${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`);
-            });
-
+            targetDataset.forEach((row, index) => { csvRows.push(`"${index + 1}","${row.testTitle || 'N/A'}","${row.studentName}","\t${row.studentEmail || 'N/A'}","\t${row.studentPhone || 'N/A'}","\t${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`); });
             const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
-            const downloaderAnchor = document.createElement("a");
-            downloaderAnchor.href = URL.createObjectURL(blob);
-            downloaderAnchor.setAttribute("download", `MockGuide_Report_${targetDate}.csv`);
-            document.body.appendChild(downloaderAnchor); downloaderAnchor.click(); document.body.removeChild(downloaderAnchor);
+            const downloaderAnchor = document.createElement("a"); downloaderAnchor.href = URL.createObjectURL(blob); downloaderAnchor.setAttribute("download", `MockGuide_Report_${targetDate}.csv`); document.body.appendChild(downloaderAnchor); downloaderAnchor.click(); document.body.removeChild(downloaderAnchor);
         }
 
-        // --- STUDENT EXECUTIVE TERMINAL console UTILITIES ---
-        function compileStudentNavigationConsole() {
-            const quizID = currentQuizDatabaseID || 'preview';
-            localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections));
-            localStorage.setItem('executionPointer_' + quizID, executionPointer);
-            localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
-            localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount);
-
-            renderStudentMatrixDock();
-            renderActiveQuestionViewport();
-        }
+        function transitionToStudentRuntime() { isStudentRuntimeActive = true; document.getElementById('role-badge').innerText = "Student Mode Active"; document.getElementById('role-badge').className = "bg-green-50 text-green-700 text-xs px-3 py-2 rounded-full font-bold border border-green-200"; document.getElementById('live-running-test-name').innerText = globalTestMeta.name; document.getElementById('student-zone').classList.remove('hidden'); compileStudentNavigationConsole(); triggerSystemClockTicker(); }
+        function compileStudentNavigationConsole() { const quizID = currentQuizDatabaseID || 'preview'; localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections)); localStorage.setItem('executionPointer_' + quizID, executionPointer); localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds); localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount); renderStudentMatrixDock(); renderActiveQuestionViewport(); }
 
         function renderStudentMatrixDock() {
             const targetGridFrame = document.getElementById('std-matrix-grid'); targetGridFrame.innerHTML = "";
             masterRecordsArray.forEach((_, idx) => {
-                const matrixBoxElement = document.createElement('button');
-                matrixBoxElement.className = "text-center py-2 text-xs font-bold rounded border transition cursor-pointer ";
+                const matrixBoxElement = document.createElement('button'); matrixBoxElement.className = "text-center py-2 text-xs font-bold rounded border transition cursor-pointer ";
                 if(idx === executionPointer) matrixBoxElement.className += "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-100 font-black";
                 else if(trackedClientSelections[idx] !== undefined) matrixBoxElement.className += "bg-emerald-500 text-white border-emerald-500";
                 else matrixBoxElement.className += "bg-white text-slate-400 border-slate-200 hover:bg-slate-50";
-
-                matrixBoxElement.innerText = String(idx + 1).padStart(2, '0');
-                matrixBoxElement.addEventListener('click', () => { executionPointer = idx; compileStudentNavigationConsole(); });
-                targetGridFrame.appendChild(matrixBoxElement);
+                matrixBoxElement.innerText = String(idx + 1).padStart(2, '0'); matrixBoxElement.addEventListener('click', () => { executionPointer = idx; compileStudentNavigationConsole(); }); targetGridFrame.appendChild(matrixBoxElement);
             });
         }
 
         function renderActiveQuestionViewport() {
-            const currentItemRecord = masterRecordsArray[executionPointer];
-            document.getElementById('question-index-label').innerText = `Question ${executionPointer + 1} of ${masterRecordsArray.length}`;
-            
+            const currentItemRecord = masterRecordsArray[executionPointer]; document.getElementById('question-index-label').innerText = `Question ${executionPointer + 1} of ${masterRecordsArray.length}`;
             const catBadge = document.getElementById('std-category-badge');
-            if(currentItemRecord.Category && currentItemRecord.Category.trim() !== "") {
-                catBadge.innerText = `Category: ${currentItemRecord.Category.trim()}`;
-                catBadge.classList.remove('hidden');
-            } else { catBadge.classList.add('hidden'); }
-
-            const imageWrapperElement = document.getElementById('std-img-frame');
-            const imgPayloadNode = document.getElementById('std-img-payload');
-            if(currentItemRecord.ImageUrl && currentItemRecord.ImageUrl.trim() !== "") {
-                imgPayloadNode.src = currentItemRecord.ImageUrl.trim(); imageWrapperElement.classList.remove('hidden');
-            } else { imageWrapperElement.classList.add('hidden'); imgPayloadNode.src = ""; }
-
+            if(currentItemRecord.Category && currentItemRecord.Category.trim() !== "") { catBadge.innerText = `Category: ${currentItemRecord.Category.trim()}`; catBadge.classList.remove('hidden'); } else { catBadge.classList.add('hidden'); }
+            const imageWrapperElement = document.getElementById('std-img-frame'); const imgPayloadNode = document.getElementById('std-img-payload');
+            if(currentItemRecord.ImageUrl && currentItemRecord.ImageUrl.trim() !== "") { imgPayloadNode.src = currentItemRecord.ImageUrl.trim(); imageWrapperElement.classList.remove('hidden'); } else { imageWrapperElement.classList.add('hidden'); imgPayloadNode.src = ""; }
             document.getElementById('std-question-text').innerText = currentItemRecord.Question;
             const optionsMountContainer = document.getElementById('std-options-box'); optionsMountContainer.innerHTML = "";
 
@@ -798,139 +739,88 @@
                 const columnKeyMap = `Answer ${char}`;
                 if(currentItemRecord[columnKeyMap] && currentItemRecord[columnKeyMap].trim() !== "") {
                     const activeSelectionStateChecked = trackedClientSelections[executionPointer] === char ? 'checked' : '';
-                    const optionContainerLabelNode = document.createElement('label');
-                    optionContainerLabelNode.className = `flex items-center space-x-3 p-3.5 rounded-xl border transition cursor-pointer select-none ${activeSelectionStateChecked ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`;
-                    optionContainerLabelNode.innerHTML = `
-                        <input type="radio" name="student-radio-choice" value="${char}" ${activeSelectionStateChecked} onchange="commitSelection(${executionPointer}, '${char}')" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
-                        <span class="text-sm font-semibold text-slate-700"><span class="text-slate-400 font-black mr-1">${char}.</span> ${currentItemRecord[columnKeyMap]}</span>
-                    `;
+                    const optionContainerLabelNode = document.createElement('label'); optionContainerLabelNode.className = `flex items-center space-x-3 p-3.5 rounded-xl border transition cursor-pointer select-none ${activeSelectionStateChecked ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-200' : 'bg-white border-slate-200 hover:bg-slate-50'}`;
+                    optionContainerLabelNode.innerHTML = `<input type="radio" name="student-radio-choice" value="${char}" ${activeSelectionStateChecked} onchange="commitSelection(${executionPointer}, '${char}')" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"><span class="text-sm font-semibold text-slate-700"><span class="text-slate-400 font-black mr-1">${char}.</span> ${currentItemRecord[columnKeyMap]}</span>`;
                     optionsMountContainer.appendChild(optionContainerLabelNode);
                 }
             });
 
             document.getElementById('nav-action-back').disabled = (executionPointer === 0);
-            if(executionPointer === masterRecordsArray.length - 1) {
-                document.getElementById('nav-action-forward').innerHTML = `Finish Test <i class="fa-solid fa-flag-checkered ml-1.5"></i>`;
-                document.getElementById('nav-action-forward').className = "bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-md cursor-pointer";
-            } else {
-                document.getElementById('nav-action-forward').innerHTML = `Submit & Next <i class="fa-solid fa-arrow-right ml-1.5"></i>`;
-                document.getElementById('nav-action-forward').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-md cursor-pointer";
-            }
+            if(executionPointer === masterRecordsArray.length - 1) { document.getElementById('nav-action-forward').innerHTML = `Finish Test <i class="fa-solid fa-flag-checkered ml-1.5"></i>`; document.getElementById('nav-action-forward').className = "bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-md cursor-pointer"; }
+            else { document.getElementById('nav-action-forward').innerHTML = `Submit & Next <i class="fa-solid fa-arrow-right ml-1.5"></i>`; document.getElementById('nav-action-forward').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-md cursor-pointer"; }
         }
 
         window.commitSelection = function(pointerIndex, optionLetterValue) { trackedClientSelections[pointerIndex] = optionLetterValue; compileStudentNavigationConsole(); };
         document.getElementById('nav-action-forward').addEventListener('click', () => { if(executionPointer < masterRecordsArray.length - 1) { executionPointer++; compileStudentNavigationConsole(); } else { evaluateAndPublishScoreboard(); } });
         document.getElementById('nav-action-back').addEventListener('click', () => { if(executionPointer > 0) { executionPointer--; compileStudentNavigationConsole(); } });
-        document.getElementById('explicit-terminate-test').addEventListener('click', () => { if(confirm("Are you sure you want to submit the test and view results?")) evaluateAndPublishScoreboard(); });
+        document.getElementById('explicit-terminate-test').addEventListener('click', () => { if(confirm("Are you sure?")) evaluateAndPublishScoreboard(); });
 
         document.getElementById('modal-trigger-link').addEventListener('click', () => {
             const listFrameElement = document.getElementById('all-q-modal-list'); listFrameElement.innerHTML = "";
             masterRecordsArray.forEach((q, idx) => {
                 const hasBeenAnswered = trackedClientSelections[idx] !== undefined;
                 const statusBadgeMarkupString = hasBeenAnswered ? `<span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded font-bold border border-emerald-200">Attempted</span>` : `<span class="bg-red-50 text-red-500 text-[10px] px-2 py-0.5 rounded font-bold border border-red-100">Unanswered</span>`;
-                const itemRowNodeElement = document.createElement('div');
-                itemRowNodeElement.className = `p-3 rounded-xl border text-xs font-medium cursor-pointer transition flex justify-between items-center ${idx === executionPointer ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`;
+                const itemRowNodeElement = document.createElement('div'); itemRowNodeElement.className = `p-3 rounded-xl border text-xs font-medium cursor-pointer transition flex justify-between items-center ${idx === executionPointer ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`;
                 const cleanShortString = q.Question.length > 50 ? q.Question.substring(0, 50) + "..." : q.Question;
                 itemRowNodeElement.innerHTML = `<div class="space-y-1 pr-2"><div class="font-bold text-slate-800">Question ${idx + 1}</div><div class="text-slate-400 font-normal">${cleanShortString}</div></div><div>${statusBadgeMarkupString}</div>`;
-                itemRowNodeElement.addEventListener('click', () => { executionPointer = idx; compileStudentNavigationConsole(); document.getElementById('all-questions-modal').classList.add('hidden'); });
-                listFrameElement.appendChild(itemRowNodeElement);
+                itemRowNodeElement.addEventListener('click', () => { executionPointer = idx; compileStudentNavigationConsole(); document.getElementById('all-questions-modal').classList.add('hidden'); }); listFrameElement.appendChild(itemRowNodeElement);
             });
             document.getElementById('all-questions-modal').classList.remove('hidden');
         });
-
         document.getElementById('close-all-q-modal').addEventListener('click', () => { document.getElementById('all-questions-modal').classList.add('hidden'); });
 
         function triggerSystemClockTicker() {
             countdownTimerObject = setInterval(() => {
-                timeBudgetSeconds--;
-                const quizID = currentQuizDatabaseID || 'preview';
-                localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
-
-                if(timeBudgetSeconds <= 0) {
-                    clearInterval(countdownTimerObject);
-                    document.getElementById('std-clock-readout').innerText = "00:00:00";
-                    alert("Time over! Click OK to see your result."); evaluateAndPublishScoreboard();
-                } else {
-                    const hoursParameter = Math.floor(timeBudgetSeconds / 3600);
-                    const minutesParameter = Math.floor((timeBudgetSeconds % 3600) / 60);
-                    const secondsParameter = timeBudgetSeconds % 60;
+                timeBudgetSeconds--; const quizID = currentQuizDatabaseID || 'preview'; localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
+                if(timeBudgetSeconds <= 0) { clearInterval(countdownTimerObject); document.getElementById('std-clock-readout').innerText = "00:00:00"; alert("Time over!"); evaluateAndPublishScoreboard(); }
+                else {
+                    const hoursParameter = Math.floor(timeBudgetSeconds / 3600); const minutesParameter = Math.floor((timeBudgetSeconds % 3600) / 60); const secondsParameter = timeBudgetSeconds % 60;
                     const formattedTimeString = `${String(hoursParameter).padStart(2, '0')}:${String(minutesParameter).padStart(2, '0')}:${String(secondsParameter).padStart(2, '0')}`;
-                    document.getElementById('std-clock-readout').innerText = formattedTimeString;
-                    document.getElementById('sync-sub-clock').innerText = formattedTimeString;
+                    document.getElementById('std-clock-readout').innerText = formattedTimeString; document.getElementById('sync-sub-clock').innerText = formattedTimeString;
                 }
             }, 1000);
         }
 
         function evaluateAndPublishScoreboard() {
-            clearInterval(countdownTimerObject); isStudentRuntimeActive = false; 
-            const quizID = currentQuizDatabaseID || 'preview';
-            localStorage.removeItem('isStudentRuntimeActive_' + quizID);
-
-            const lastSavedName = localStorage.getItem('last_entered_name_' + quizID);
-            if(lastSavedName) localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
+            clearInterval(countdownTimerObject); isStudentRuntimeActive = false; const quizID = currentQuizDatabaseID || 'preview'; localStorage.removeItem('isStudentRuntimeActive_' + quizID);
+            const lastSavedName = localStorage.getItem('last_entered_name_' + quizID); if(lastSavedName) localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
 
             let incrementalCorrectCounter = 0; let incrementalWrongCounter = 0; let incrementalUnattemptedCounter = 0;
             masterRecordsArray.forEach((recordItem, recordIndexIdx) => {
                 const cleanMasterKey = recordItem.Correct ? recordItem.Correct.trim().toUpperCase() : '';
                 const cleanStudentProvidedKey = trackedClientSelections[recordIndexIdx] ? trackedClientSelections[recordIndexIdx].toUpperCase() : '';
-                if(cleanStudentProvidedKey === '') incrementalUnattemptedCounter++;
-                else if(cleanStudentProvidedKey === cleanMasterKey) incrementalCorrectCounter++;
-                else incrementalWrongCounter++;
+                if(cleanStudentProvidedKey === '') incrementalUnattemptedCounter++; else if(cleanStudentProvidedKey === cleanMasterKey) incrementalCorrectCounter++; else incrementalWrongCounter++;
             });
 
             const rawCalculatedPercentage = Math.round((incrementalCorrectCounter / masterRecordsArray.length) * 100);
-            const dateObj = new Date();
-            const formattedDateString = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+            const dateObj = new Date(); const formattedDateString = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
             if(currentQuizDatabaseID && currentQuizDatabaseID !== "") {
                 const analyticsNodePayload = {
-                    testTitle: globalTestMeta.name || "General Mock Test",
-                    studentName: studentProfile.name || "Anonymous", studentEmail: studentProfile.email || "N/A", studentPhone: studentProfile.phone || "N/A",
-                    scoreRaw: `${incrementalCorrectCounter} / ${masterRecordsArray.length}`, scorePercent: rawCalculatedPercentage,
-                    tabSwitches: proctorTabSwitchCount, submissionDate: formattedDateString, timestamp: firebase.database.ServerValue.TIMESTAMP
+                    testTitle: globalTestMeta.name || "General Mock Test", studentName: studentProfile.name || "Anonymous", studentEmail: studentProfile.email || "N/A", studentPhone: studentProfile.phone || "N/A",
+                    scoreRaw: `${incrementalCorrectCounter} / ${masterRecordsArray.length}`, scorePercent: rawCalculatedPercentage, tabSwitches: proctorTabSwitchCount, submissionDate: formattedDateString, timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
                 databaseRef.ref('quiz_results/' + currentQuizDatabaseID).push(analyticsNodePayload);
             }
 
-            document.getElementById('res-total-q').innerText = masterRecordsArray.length;
-            document.getElementById('res-correct-q').innerText = incrementalCorrectCounter;
-            document.getElementById('res-wrong-q').innerText = incrementalWrongCounter;
-            document.getElementById('res-left-q').innerText = incrementalUnattemptedCounter;
-            document.getElementById('res-score-ratio').innerText = `${incrementalCorrectCounter} / ${masterRecordsArray.length}`;
-            document.getElementById('res-percentage-text').innerText = `Accuracy Score: ${rawCalculatedPercentage}%`;
-
+            document.getElementById('res-total-q').innerText = masterRecordsArray.length; document.getElementById('res-correct-q').innerText = incrementalCorrectCounter; document.getElementById('res-wrong-q').innerText = incrementalWrongCounter; document.getElementById('res-left-q').innerText = incrementalUnattemptedCounter;
+            document.getElementById('res-score-ratio').innerText = `${incrementalCorrectCounter} / ${masterRecordsArray.length}`; document.getElementById('res-percentage-text').innerText = `Accuracy Score: ${rawCalculatedPercentage}%`;
             const scoreCardRef = document.getElementById('conditional-score-card');
             if (rawCalculatedPercentage < 50) scoreCardRef.className = "inline-block p-6 rounded-2xl border text-center max-w-sm w-full bg-red-50 text-red-700 border-red-200 shadow-sm";
             else if (rawCalculatedPercentage >= 50 && rawCalculatedPercentage <= 70) scoreCardRef.className = "inline-block p-6 rounded-2xl border text-center max-w-sm w-full bg-amber-50 text-amber-700 border-amber-200 shadow-sm";
             else scoreCardRef.className = "inline-block p-6 rounded-2xl border text-center max-w-sm w-full bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm";
 
-            document.getElementById('student-zone').classList.add('hidden');
-            document.getElementById('results-zone').classList.remove('hidden');
+            document.getElementById('student-zone').classList.add('hidden'); document.getElementById('results-zone').classList.remove('hidden');
         }
 
-        // --- STRICTOR PROCTOR PROTOCOLS MONITOR LOOP ---
-        document.addEventListener('visibilitychange', () => {
-            if (isStudentRuntimeActive && document.hidden) {
-                proctorTabSwitchCount++;
-                const quizID = currentQuizDatabaseID || 'preview';
-                localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount);
-                alert(`SECURITY WARNING: Tab switching is strictly monitored! Your action has been recorded. (Violations: ${proctorTabSwitchCount})`);
-            }
-        });
-
-        document.getElementById('copy-url-btn').addEventListener('click', () => {
-            const copyInputTarget = document.getElementById('share-url-string'); copyInputTarget.select(); document.execCommand('copy');
-            navigator.clipboard.writeText(copyInputTarget.value);
-            const btnRef = document.getElementById('copy-url-btn'); btnRef.innerText = "Copied!";
-            setTimeout(() => { btnRef.innerText = "Copy Link"; }, 1500);
-        });
+        document.addEventListener('visibilitychange', () => { if (isStudentRuntimeActive && document.hidden) { proctorTabSwitchCount++; const quizID = currentQuizDatabaseID || 'preview'; localStorage.setItem('proctorTabSwitchCount_' + quizID, proctorTabSwitchCount); alert(`SECURITY WARNING: Tab switching is monitored!`); } });
+        document.getElementById('copy-url-btn').addEventListener('click', () => { const copyInputTarget = document.getElementById('share-url-string'); copyInputTarget.select(); document.execCommand('copy'); navigator.clipboard.writeText(copyInputTarget.value); });
         document.getElementById('close-share-modal').addEventListener('click', () => { document.getElementById('share-modal').classList.add('hidden'); });
 
-        // Anti-Cheating Execution Matrix
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) { e.preventDefault(); alert("Security Violation: Action is strictly prohibited!"); }
-            if (e.key === 'PrintScreen') { navigator.clipboard.writeText(""); alert("Security Violation: Screenshots are blocked!"); }
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) { e.preventDefault(); alert("Security Block Active!"); }
+            if (e.key === 'PrintScreen') { navigator.clipboard.writeText(""); alert("Screenshots blocked!"); }
         });
     </script>
 </body>
