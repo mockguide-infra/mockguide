@@ -29,7 +29,7 @@
                 <span class="text-xl font-black tracking-tight text-slate-900">Mock<span class="text-blue-600">Guide</span></span>
             </div>
             <div class="flex items-center space-x-3">
-                <button id="header-analytics-btn" onclick="scrollToAnalytics()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2 rounded-full border border-emerald-200 transition items-center space-x-1">
+                <button id="header-analytics-btn" onclick="scrollToAnalytics()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-3 py-2 rounded-full border border-emerald-200 transition items-center space-x-1">
                     <i class="fa-solid fa-chart-simple"></i> <span>View Results</span>
                 </button>
                 <span id="role-badge" class="bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-full font-bold border border-slate-200">
@@ -66,7 +66,7 @@
             </div>
         </div>
 
-        <!-- ================= SIGN UP WINDOW LAYOUT (ALAG SEPARATE VIEW) ================= -->
+        <!-- ================= SIGN UP WINDOW LAYOUT ================= -->
         <div id="auth-signup-zone" class="hidden max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
             <div class="text-center space-y-2">
                 <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-xl mx-auto border border-purple-100"><i class="fa-solid fa-user-plus"></i></div>
@@ -136,7 +136,7 @@
                     </div>
                     
                     <div id="subpanel-csv" class="md:col-span-2 flex items-end">
-                        <input type="file" id="csv-uploader" accept=".csv" class="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50" />
+                        <input type="file" id="csv-uploader" accept=".csv" class="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 cursor-pointer" />
                     </div>
                     <div id="subpanel-manual" class="hidden md:col-span-2 flex items-end">
                         <button id="manual-add-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition shadow-sm flex items-center justify-center space-x-2"><i class="fa-solid fa-plus-circle"></i> <span>Insert Blank Question Into Queue</span></button>
@@ -144,7 +144,7 @@
                     <div id="subpanel-bank" class="hidden md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="text-[10px] font-black uppercase text-slate-400 block mb-0.5">Push New CSV to Cloud Bank</label>
-                            <input type="file" id="bank-csv-uploader" accept=".csv" class="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50" />
+                            <input type="file" id="bank-csv-uploader" accept=".csv" class="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 cursor-pointer" />
                         </div>
                         <div class="flex items-end">
                             <select id="bank-category-selector" onchange="loadBankQuestionsForSelectiveChecklist()" class="w-full text-xs border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none"></select>
@@ -241,6 +241,7 @@
         <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
+                <!-- Large Bold Title Box with Sub-Clock Timer -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-1">
                     <h2 id="live-running-test-name" class="text-3xl font-black text-slate-900 tracking-tight">Mock Test</h2>
                     <p class="text-sm font-bold text-rose-500 tracking-wide font-mono"><i class="fa-regular fa-clock mr-1"></i> Time Remaining: <span id="sync-sub-clock">02:00:00</span></p>
@@ -312,7 +313,7 @@
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-2">
                     <i class="fa-solid fa-thumbs-down text-2xl text-red-500"></i>
                     <div id="res-wrong-q" class="text-2xl font-black text-slate-900 font-mono">0</div>
-                    <div class="text-xs font-bold uppercase tracking-wider text-gray-400">Wrong Answers</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Wrong Answers</div>
                 </div>
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-2">
                     <i class="fa-solid fa-lock text-2xl text-amber-500"></i>
@@ -375,7 +376,6 @@
         firebase.initializeApp(firebaseConfig);
         const databaseRef = firebase.database();
 
-        // Separate view dynamic panel shifting function anchor loop
         function switchAuthView(panelMode) {
             if(panelMode === 'signup') {
                 document.getElementById('auth-login-zone').classList.add('hidden');
@@ -386,7 +386,6 @@
             }
         }
 
-        // 100% Fixed Separate signup submission function node workflow loop
         function executeSignupSession() {
             const fullName = document.getElementById('signup-fullname').value.trim();
             const brandName = document.getElementById('signup-brand').value.trim();
@@ -405,7 +404,6 @@
             }).then(() => {
                 alert("Administrative Registry Node configured successfully. Returning to Login screen.");
                 switchAuthView('login');
-                // Clear fields values metrics parameters loops 
                 document.getElementById('signup-fullname').value = "";
                 document.getElementById('signup-brand').value = "";
                 document.getElementById('signup-username').value = "";
@@ -413,7 +411,6 @@
             }).catch(() => alert("Cloud infrastructure network authentication failure."));
         }
 
-        // 100% Fixed Separate dynamic verification logic check mechanism
         function executeLoginSession() {
             const user = document.getElementById('login-username').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value.trim();
@@ -501,7 +498,7 @@
                         row.className = "flex items-center space-x-3 py-2 text-xs text-slate-700 cursor-pointer select-none hover:bg-purple-50/50 px-1 rounded transition";
                         row.innerHTML = `
                             <input type="checkbox" data-index="${index}" class="bank-item-checkbox w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500">
-                            <span class="font-medium"><span class="text-purple-400 font-bold mr-1">#${index+1}</span> ${q.Question.substring(0,80)}...</span>
+                            <span class="font-medium"><span class="text-purple-400 font-bold mr-1">#${index+1}</span> ${q.Question ? q.Question.substring(0,80) : ''}...</span>
                         `;
                         container.appendChild(row); index++;
                     });
@@ -610,7 +607,11 @@
 
         function syncAdminEditormanifest() {
             const targetContainer = document.getElementById('dynamic-editor-holder'); targetContainer.innerHTML = "";
-            if(masterRecordsArray.length > 0) document.getElementById('live-manifest-card').classList.remove('hidden');
+            
+            // CORE BUG FIX: Hidden state toggle properly unlocked
+            if(masterRecordsArray.length > 0) {
+                document.getElementById('live-manifest-card').classList.remove('hidden');
+            }
 
             masterRecordsArray.forEach((qItem, indexIdx) => {
                 const nodeItem = document.createElement('div'); nodeItem.id = `editor-card-container-${indexIdx}`; nodeItem.className = "py-6 first:pt-0 space-y-4 rounded-xl p-3 transition-all";
@@ -699,7 +700,7 @@
             });
         }
 
-        window.deleteSingleAnalyticsLog = function(quizId, entryKey) { if(confirm("Confirm deletion execution layout keys parameter context commands from cloud?")) { databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove(); } };
+        window.deleteSingleAnalyticsLog = function(quizId, entryKey) { if(confirm("Confirm deletion sequence parameter lock commands from cloud?")) { databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove(); } };
         function filterAnalyticsByDate() { const targetDate = document.getElementById('admin-date-filter').value; if(targetDate === "all") renderLeaderboardRows(globalResultsCache); else renderLeaderboardRows(globalResultsCache.filter(item => item.submissionDate === targetDate)); }
 
         function exportFilteredAnalyticsToCSV() {
@@ -819,7 +820,7 @@
 
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) { e.preventDefault(); alert("Security Block Active!"); }
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) { e.preventDefault(); alert("Security Violation: Action is strictly prohibited!"); }
             if (e.key === 'PrintScreen') { navigator.clipboard.writeText(""); alert("Screenshots blocked!"); }
         });
     </script>
