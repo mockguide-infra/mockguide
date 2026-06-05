@@ -25,7 +25,10 @@
                 <i class="fa-solid fa-square-poll-horizontal text-3xl text-blue-600"></i>
                 <span class="text-xl font-bold tracking-tight text-gray-900">Mock<span class="text-blue-600">Guide</span></span>
             </div>
-            <div>
+            <div class="flex items-center space-x-3">
+                <button id="header-analytics-btn" onclick="scrollToAnalytics()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200 transition items-center space-x-1">
+                    <i class="fa-solid fa-chart-simple"></i> <span>View Results</span>
+                </button>
                 <span id="role-badge" class="bg-blue-50 text-blue-700 text-xs px-3 py-1.5 rounded-full font-bold border border-blue-200">
                     <i class="fa-solid fa-shield-halved mr-1.5"></i> Admin Dashboard
                 </span>
@@ -315,6 +318,12 @@
             }
         }
 
+        // Jump to analytics view smoothly
+        function scrollToAnalytics() {
+            const target = document.getElementById('admin-results-card');
+            if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         // Parse query URL routing (?quiz=ID)
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
@@ -322,20 +331,6 @@
             
             if (targetedQuizID) {
                 currentQuizDatabaseID = targetedQuizID;
-                
-                // Strict block re-entry if already submitted from this browser instance
-                if (localStorage.getItem('quiz_completed_' + targetedQuizID) === 'true') {
-                    document.getElementById('admin-zone').classList.add('hidden');
-                    document.getElementById('student-gateway-zone').innerHTML = `
-                        <div class="text-center space-y-4 p-6 bg-red-50 border border-red-200 rounded-xl">
-                            <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
-                            <h2 class="text-xl font-bold text-gray-900">Submission Block Active</h2>
-                            <p class="text-sm text-gray-600">You have already completed and submitted this examination instance. Multiple attempts are strictly prohibited.</p>
-                        </div>
-                    `;
-                    document.getElementById('student-gateway-zone').classList.remove('hidden');
-                    return;
-                }
 
                 databaseRef.ref('live_quizzes/' + targetedQuizID).once('value')
                     .then((snapshot) => {
@@ -357,6 +352,12 @@
                                 document.getElementById('admin-zone').classList.add('hidden');
                                 transitionToStudentRuntime();
                             } else {
+                                // Dynamic validation hook: Name matching block sequence criteria lookup
+                                const normalizedName = (localStorage.getItem('last_entered_name_' + targetedQuizID) || "").toLowerCase().trim();
+                                if(normalizedName !== "" && localStorage.getItem('name_blocked_' + targetedQuizID + '_' + normalizedName) === 'true') {
+                                    blockGatewayWithCustomAlert(`Submission Block Active: The name reference sequence matching your current profile credentials has already locked active entries for this quiz resource instance.`);
+                                    return;
+                                }
                                 timeBudgetSeconds = globalTestMeta.duration * 60;
                                 showStudentGatewayForm();
                             }
@@ -370,12 +371,23 @@
                         }
                     });
             } else {
-                // If on pure admin page, boot dynamic listener row hooks to fetch global logs arrays
                 fetchAndRenderAdminLeaderboard();
             }
         });
 
-        // NAYA FEATURE: Fetch and rank results into admin logs dashboard list
+        function blockGatewayWithCustomAlert(msgString) {
+            document.getElementById('admin-zone').classList.add('hidden');
+            document.getElementById('student-gateway-zone').innerHTML = `
+                <div class="text-center space-y-4 p-6 bg-red-50 border border-red-200 rounded-xl">
+                    <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
+                    <h2 class="text-xl font-bold text-gray-900">Access Restricted</h2>
+                    <p class="text-sm text-gray-600">${msgString}</p>
+                </div>
+            `;
+            document.getElementById('student-gateway-zone').classList.remove('hidden');
+        }
+
+        // Fetch and rank results into admin logs dashboard list
         function fetchAndRenderAdminLeaderboard() {
             databaseRef.ref('quiz_results').on('value', (snapshot) => {
                 const tbody = document.getElementById('admin-results-tbody');
@@ -383,15 +395,16 @@
                 
                 if (snapshot.exists()) {
                     document.getElementById('admin-results-card').classList.remove('hidden');
-                    let rawList = [];
+                    document.getElementById('header-analytics-btn').classList.remove('hidden');
+                    document.getElementById('header-analytics-btn').classList.add('inline-flex');
                     
+                    let rawList = [];
                     snapshot.forEach((childQuiz) => {
                         childQuiz.forEach((entry) => {
                             rawList.push(entry.val());
                         });
                     });
                     
-                    // Sort descending matching high percentile matrix standards
                     rawList.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
                     
                     rawList.forEach((row, rIdx) => {
@@ -429,20 +442,50 @@
                 alert("Please enter your name to start the test.");
                 return;
             }
-            
-            studentProfile.name = nameInput;
-            studentProfile.email = emailInput;
-            studentProfile.phone = phoneInput;
-            
+
+            // Real-time Cloud validation tracking parameters before entry validation loop
             const quizID = currentQuizDatabaseID || 'preview';
-            localStorage.setItem('isStudentRuntimeActive_' + quizID, 'true');
-            localStorage.setItem('studentProfile_' + quizID, JSON.stringify(studentProfile));
-            
-            document.getElementById('student-gateway-zone').classList.add('hidden');
-            transitionToStudentRuntime();
+            const lookupKeyName = nameInput.toLowerCase();
+
+            databaseRef.ref('quiz_results/' + quizID).once('value').then((snapshot) => {
+                let nameAlreadyExists = false;
+                if(snapshot.exists()) {
+                    snapshot.forEach((entry) => {
+                        if((entry.val().studentName || "").toLowerCase().trim() === lookupKeyName) {
+                            nameAlreadyExists = true;
+                        }
+                    });
+                }
+
+                if(nameAlreadyExists) {
+                    alert(`Access Blocked: The candidate profile identifier "${nameInput}" has an absolute active log record already submitted. Alter your identity string (e.g., add trailing integers like ${nameInput}_2) if re-entry execution parameters were authorized.`);
+                } else {
+                    studentProfile.name = nameInput;
+                    studentProfile.email = emailInput;
+                    studentProfile.phone = phoneInput;
+                    
+                    localStorage.setItem('isStudentRuntimeActive_' + quizID, 'true');
+                    localStorage.setItem('studentProfile_' + quizID, JSON.stringify(studentProfile));
+                    localStorage.setItem('last_entered_name_' + quizID, lookupKeyName);
+
+                    document.getElementById('student-gateway-zone').classList.add('hidden');
+                    transitionToStudentRuntime();
+                }
+            });
         });
 
         // --- ADMINISTRATIVE CONFIGURATIONS ---
+        function downloadCSVTemplate() {
+            const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "MockGuide_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
@@ -783,8 +826,13 @@
             isStudentRuntimeActive = false; 
             
             const quizID = currentQuizDatabaseID || 'preview';
-            localStorage.setItem('quiz_completed_' + quizID, 'true'); // Final Submit Lock string
             localStorage.removeItem('isStudentRuntimeActive_' + quizID);
+
+            // Dynamically register name block identifier for this specific user string loop context
+            const lastSavedName = localStorage.getItem('last_entered_name_' + quizID);
+            if(lastSavedName) {
+                localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
+            }
 
             let incrementalCorrectCounter = 0;
             let incrementalWrongCounter = 0;
@@ -805,7 +853,6 @@
 
             const rawCalculatedPercentage = Math.round((incrementalCorrectCounter / masterRecordsArray.length) * 100);
 
-            // NAYA FEATURE: Save score structural metrics securely directly to cloud nodes under quiz id node arrays
             if(currentQuizDatabaseID && currentQuizDatabaseID !== "") {
                 const analyticsNodePayload = {
                     studentName: studentProfile.name || "Anonymous",
@@ -840,7 +887,7 @@
             document.getElementById('results-zone').classList.remove('hidden');
         }
 
-        // --- NAYA FEATURE: STRICT PROCTORING & ANTI-CHEATING PROTOCOLS ---
+        // --- STRICT PROCTORING & ANTI-CHEATING PROTOCOLS ---
         document.addEventListener('visibilitychange', () => {
             if (isStudentRuntimeActive && document.hidden) {
                 proctorTabSwitchCount++;
