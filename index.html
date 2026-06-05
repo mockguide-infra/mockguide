@@ -214,10 +214,10 @@
                 </div>
                 
                 <div class="pt-4">
-                    <button onclick="clearAndReload()" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm">
-                        <i class="fa-solid fa-rotate-left mr-1.5"></i> Reset Terminal Instance
-                    </button>
-                </div>
+    <button onclick="window.close();" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm">
+        <i class="fa-solid fa-rectangle-xmark mr-1.5"></i> Close Window
+    </button>
+</div>
             </div>
         </div>
 
@@ -489,16 +489,21 @@
                 questions: masterRecordsArray
             };
 
-            databaseRef.ref('live_quizzes/' + uniqueQuizID).set(packagingNodePayload, (error) => {
-                btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
-                if (error) {
-                    alert("Cloud operations saving error.");
-                } else {
+            databaseRef.ref('live_quizzes/' + uniqueQuizID).set(packagingNodePayload)
+                .then(() => {
+                    btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
                     const shortMiniatureLiveUrl = `${window.location.origin}${window.location.pathname}?quiz=${uniqueQuizID}`;
                     document.getElementById('share-url-string').value = shortMiniatureLiveUrl;
                     document.getElementById('share-modal').classList.remove('hidden');
-                }
-            });
+                })
+                .catch((error) => {
+                    btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
+                    alert("Cloud operations saving error: " + error.message);
+                });
+        });
+
+document.getElementById('close-share-modal').addEventListener('click', () => {
+            document.getElementById('share-modal').classList.add('hidden');
         });
 
         document.getElementById('admin-launch-btn').addEventListener('click', () => {
