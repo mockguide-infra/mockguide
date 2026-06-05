@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MockGuide - Ultimate Testing Platform</title>
-    <!-- Dependencies Libraries Links -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Core Libraries Integration -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -20,10 +18,8 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Header Panel -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <!-- Smart Logo Router (Blocks navigation if student mode is active) -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="handleLogoClick()">
                 <i class="fa-solid fa-square-poll-horizontal text-3xl text-blue-600"></i>
                 <span class="text-xl font-bold tracking-tight text-gray-900">Mock<span class="text-blue-600">Guide</span></span>
@@ -38,10 +34,27 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- ================= ADMIN ZONE ================= -->
         <div id="admin-zone" class="space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-gear text-blue-600 mr-2"></i>Global Test Configuration Settings</h3>
+                    <button onclick="downloadCSVTemplate()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs px-3 py-2 rounded-lg border border-blue-200 transition flex items-center space-x-1">
+                        <i class="fa-solid fa-download"></i> <span>Download CSV Template</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-black uppercase text-gray-400 tracking-wider block mb-1">Test Name / Title (e.g., SSC Mock, IBPS Quiz)</label>
+                        <input type="text" id="config-test-name" value="General Mock Test" class="w-full text-sm border border-gray-200 rounded p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-black uppercase text-gray-400 tracking-wider block mb-1">Time Duration Limit (In Minutes)</label>
+                        <input type="number" id="config-test-time" value="120" min="1" class="w-full text-sm border border-gray-200 rounded p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- CSV Upload -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 1: Batch Upload via CSV</h3>
                     <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
@@ -52,11 +65,10 @@
                         <input type="file" id="csv-uploader" accept=".csv" class="hidden" />
                     </label>
                 </div>
-                <!-- Manual Direct Insertion -->
                 <div class="space-y-3 flex flex-col justify-between">
                     <div>
                         <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 2: Manual Direct Insertion</h3>
-                        <p class="text-xs text-gray-500 mt-2">Add individual mock questions instantly directly into the database stack without any external file dependency.</p>
+                        <p class="text-xs text-gray-500 mt-2">Add individual mock questions instantly directly into the database stack.</p>
                     </div>
                     <button id="manual-add-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg text-sm transition shadow-sm flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-plus-circle"></i> <span>Insert Question Manually</span>
@@ -64,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Editor Engine Roster Pipeline -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 gap-4">
                     <div>
@@ -76,59 +87,83 @@
                             <i class="fa-solid fa-link"></i> <span>Create Test Link</span>
                         </button>
                         <button id="admin-launch-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow-sm transition flex items-center space-x-2">
-                            <span>Launch Live Test</span> <i class="fa-solid fa-circle-play"></i>
+                            <span>Preview / Launch Test</span> <i class="fa-solid fa-circle-play"></i>
                         </button>
                     </div>
                 </div>
-                
                 <div id="dynamic-editor-holder" class="space-y-6 divide-y divide-gray-100"></div>
             </div>
         </div>
 
-        <!-- ================= STUDENT EXAM TERMINAL ================= -->
-        <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Panel: Question Delivery -->
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm min-h-[420px] flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-3 mb-6">
-                            <span class="uppercase tracking-wider text-gray-500">Pick one of the choices</span>
-                            <button id="modal-trigger-link" class="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-semibold text-sm bg-blue-50 px-3 py-1 rounded">
-                                <i class="fa-solid fa-list-check"></i> <span>See all questions</span>
-                            </button>
-                        </div>
-
-                        <div class="space-y-6">
-                            <div id="std-img-frame" class="hidden w-full max-h-72 overflow-hidden border border-gray-200 rounded-lg flex justify-center bg-gray-50">
-                                <img id="std-img-payload" src="" alt="Testing Structural Image" class="object-contain p-2 max-h-72" />
-                            </div>
-                            <h3 id="std-question-text" class="text-lg font-semibold text-gray-900 leading-relaxed whitespace-pre-wrap"></h3>
-                            <div id="std-options-box" class="space-y-3"></div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-6 border-t border-gray-100 mt-8">
-                        <button id="nav-action-back" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-5 py-2.5 rounded-lg text-sm transition">
-                            <i class="fa-solid fa-arrow-left mr-2"></i> Previous
-                        </button>
-                        <button id="nav-action-forward" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm">
-                            Submit & Next <i class="fa-solid fa-arrow-right ml-1.5"></i>
-                        </button>
-                    </div>
+        <div id="student-gateway-zone" class="hidden max-w-md mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-md space-y-6">
+            <div class="text-center space-y-2">
+                <h2 id="gateway-test-title" class="text-xl font-bold text-gray-900">General Mock Test</h2>
+                <p class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-clock mr-1"></i> Duration Allocation: <span id="gateway-test-time-label">120</span> Minutes</p>
+            </div>
+            <div class="w-full h-px bg-gray-100"></div>
+            <form id="gateway-info-form" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 block mb-1">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="std-input-name" required placeholder="Enter your full name" class="w-full text-sm border border-gray-200 rounded p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
                 </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 block mb-1">Email Address <span class="text-gray-300">(Optional)</span></label>
+                    <input type="email" id="std-input-email" placeholder="alex@domain.com" class="w-full text-sm border border-gray-200 rounded p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 block mb-1">Contact Number <span class="text-gray-300">(Optional)</span></label>
+                    <input type="tel" id="std-input-phone" placeholder="Enter mobile number" class="w-full text-sm border border-gray-200 rounded p-2.5 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <button type="button" id="gateway-start-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-sm mt-2">
+                    Start Examination Window <i class="fa-solid fa-right-to-bracket ml-1.5"></i>
+                </button>
+            </form>
+        </div>
 
-                <div class="flex justify-center">
-                    <button id="explicit-terminate-test" class="border border-red-200 hover:bg-red-50 text-red-600 font-bold px-8 py-3 rounded-lg text-sm shadow-sm transition">
-                        Submit Test & View Result
-                    </button>
+        <div id="student-zone" class="hidden space-y-6">
+            <div class="text-center bg-white border border-gray-200 rounded-xl p-6 shadow-sm max-w-2xl mx-auto space-y-3">
+                <h1 id="live-running-test-name" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 uppercase">General Mock Test</h1>
+                <div class="inline-flex items-center space-x-2 bg-red-50 border border-red-100 text-red-600 font-mono text-xl sm:text-2xl px-5 py-2 rounded-lg font-black tracking-widest shadow-inner">
+                    <i class="fa-regular fa-clock animate-pulse"></i>
+                    <span id="std-clock-readout">02:00:00</span>
                 </div>
             </div>
 
-            <!-- Right Panel: Diagnostics Watchtower -->
-            <div class="space-y-6">
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center space-y-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">Time Remaining</h3>
-                    <div id="std-clock-readout" class="text-3xl font-black text-red-500 tracking-wider font-mono bg-red-50 py-2 rounded-lg border border-red-100">02:00:00</div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-sm min-h-[400px] flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-3 mb-6">
+                                <span class="uppercase tracking-wider text-gray-500">Pick one of the choices</span>
+                                <button id="modal-trigger-link" class="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-semibold text-sm bg-blue-50 px-3 py-1 rounded">
+                                    <i class="fa-solid fa-list-check"></i> <span>See all questions</span>
+                                </button>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div id="std-img-frame" class="hidden w-full max-h-72 overflow-hidden border border-gray-200 rounded-lg flex justify-center bg-gray-50">
+                                    <img id="std-img-payload" src="" alt="Testing Structural Image" class="object-contain p-2 max-h-72" />
+                                </div>
+                                <h3 id="std-question-text" class="text-lg font-semibold text-gray-900 leading-relaxed whitespace-pre-wrap"></h3>
+                                <div id="std-options-box" class="space-y-3"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-6 border-t border-gray-100 mt-8">
+                            <button id="nav-action-back" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-5 py-2.5 rounded-lg text-sm transition">
+                                <i class="fa-solid Faust-arrow-left mr-2"></i> Previous
+                            </button>
+                            <button id="nav-action-forward" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-sm">
+                                Submit & Next <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button id="explicit-terminate-test" class="border border-red-200 hover:bg-red-50 text-red-600 font-bold px-8 py-3 rounded-lg text-sm shadow-sm transition">
+                            Submit Test & View Result
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
@@ -138,7 +173,6 @@
             </div>
         </div>
 
-        <!-- ================= ANALYTICS SCOREBOARD PANEL ================= -->
         <div id="results-zone" class="hidden space-y-8 max-w-4xl mx-auto">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                 <h2 class="text-xl font-bold tracking-tight text-gray-900 uppercase">Test Result Dashboard</h2>
@@ -177,8 +211,8 @@
                 </div>
                 
                 <div class="pt-4">
-                    <button onclick="location.reload()" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm">
-                        <i class="fa-solid fa-rotate-left mr-1.5"></i> Reset Terminal Instance
+                    <button onclick="clearStorageAndReload()" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold tracking-wider uppercase px-6 py-3 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-rotate-left mr-1.5"></i> Restart Console Instance
                     </button>
                 </div>
             </div>
@@ -186,16 +220,13 @@
 
     </main>
 
-    <!-- ================= INTERACTIVE MODALS ================= -->
-    <!-- Share Link Modal Window -->
     <div id="share-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl border border-gray-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100">
                 <i class="fa-solid fa-link"></i>
             </div>
             <h3 class="text-lg font-bold text-gray-900">Shareable Mock Link Active</h3>
-            <p class="text-xs text-gray-400">ClassMarker style mini URL created successfully. Share it directly with your students.</p>
-            
+            <p class="text-xs text-gray-400">ClassMarker style miniature database URL created. Share it with your students.</p>
             <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 p-2.5 rounded-lg">
                 <input type="text" id="share-url-string" readonly class="bg-transparent text-xs font-mono text-gray-600 flex-1 focus:outline-none" />
                 <button id="copy-url-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0">Copy Link</button>
@@ -204,7 +235,6 @@
         </div>
     </div>
 
-    <!-- See All Questions Dropdown Drawer -->
     <div id="all-questions-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-end z-50">
         <div class="bg-white h-full w-full max-w-md shadow-2xl p-6 flex flex-col justify-between border-l border-gray-100">
             <div>
@@ -214,13 +244,11 @@
                 </div>
                 <div id="all-q-modal-list" class="space-y-2.5 overflow-y-auto max-h-[75vh] pr-1"></div>
             </div>
-            <div class="bg-gray-50 p-4 rounded-lg text-center text-xs text-gray-400 font-medium">Click on any dynamic row block to instantly switch pointer alignment.</div>
+            <div class="bg-gray-50 p-4 rounded-lg text-center text-xs text-gray-400 font-medium">Click on any row to jump to that question.</div>
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT SYSTEM ENGINE ================= -->
     <script>
-        // --- YOUR FIREBASE CONFIGURATION COUPLING ---
         const firebaseConfig = {
             apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
             authDomain: "mockguide-62695.firebaseapp.com",
@@ -231,55 +259,122 @@
             appId: "1:751219838978:web:3529650f221e6a91f9571b"
         };
         
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const databaseRef = firebase.database();
 
         let masterRecordsArray = [];
         let executionPointer = 0;
         let countdownTimerObject = null;
-        let timeBudgetSeconds = 120 * 60;
+        let timeBudgetSeconds = 120 * 60; 
         let trackedClientSelections = {};
         let isStudentRuntimeActive = false;
+        let globalTestMeta = { name: "General Mock Test", duration: 120 };
 
-        // Security Routing: Blocks logo redirection if student is taking a test
         function handleLogoClick() {
             if(isStudentRuntimeActive) {
-                alert("Navigation locked! You cannot exit or return to admin dashboard during an active examination window.");
+                alert("Navigation locked! You cannot exit during an active examination window.");
             } else {
-                location.href = window.location.pathname;
+                clearStorageAndReload();
             }
         }
 
-        // Deep Hook Check: URL parsing to detect ClassMarker-like '?quiz=ID' parameters
+        function clearStorageAndReload() {
+            localStorage.clear();
+            location.href = window.location.pathname;
+        }
+
+        // CSV Template Auto-Downloader Generator 
+        function downloadCSVTemplate() {
+            const csvContent = "Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E,Points,ImageUrl\nSample Question Text Here,A,Option A Text,Option B Text,Option C Text,Option D Text,,1,";
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "MockGuide_Template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize state parsing on document load
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
             const targetedQuizID = URLParameters.get('quiz');
             
             if (targetedQuizID) {
-                // Fetch specific quiz structure from cloud locker instantly
-                databaseRef.ref('quizzes/' + targetedQuizID).once('value')
+                // Check if active test state exists in current local cache memory to bypass refresh data loss
+                if (localStorage.getItem('currentQuizID') === targetedQuizID && localStorage.getItem('isTestRunning') === 'true') {
+                    resumeCachedStudentExam(targetedQuizID);
+                    return;
+                }
+
+                databaseRef.ref('live_quizzes/' + targetedQuizID).once('value')
                     .then((snapshot) => {
                         if (snapshot.exists()) {
-                            masterRecordsArray = snapshot.val();
-                            // Push dummy history frame to trap physical browser back button
+                            const packageData = snapshot.val();
+                            masterRecordsArray = packageData.questions;
+                            globalTestMeta.name = packageData.testName || "General Mock Test";
+                            globalTestMeta.duration = parseInt(packageData.testDuration) || 120;
+                            timeBudgetSeconds = globalTestMeta.duration * 60;
+
+                            localStorage.setItem('currentQuizID', targetedQuizID);
+                            localStorage.setItem('masterQuestions', JSON.stringify(masterRecordsArray));
+                            localStorage.setItem('testName', globalTestMeta.name);
+
+                            // Anti-Back Browser Trapping Setup
                             history.pushState(null, null, window.location.href);
                             window.addEventListener('popstate', function () {
                                 history.pushState(null, null, window.location.href);
-                                alert("Strict Navigation Active: Use inside platform controls 'Previous' and 'Submit & Next' buttons to move around questions!");
                             });
-                            transitionToStudentRuntime();
+                            
+                            showStudentGatewayForm();
                         } else {
-                            alert("Requested Exam ID reference record not found on live database registers.");
+                            alert("Exam ID reference record not found on live cloud.");
                         }
-                    })
-                    .catch(() => {
-                        alert("Database configuration read sequence tracking aborted.");
                     });
             }
         });
 
-        // --- ADMINISTRATIVE CORE MODULES ---
+        function resumeCachedStudentExam(quizID) {
+            masterRecordsArray = JSON.parse(localStorage.getItem('masterQuestions'));
+            globalTestMeta.name = localStorage.getItem('testName');
+            timeBudgetSeconds = parseInt(localStorage.getItem('timeRemaining'));
+            trackedClientSelections = JSON.parse(localStorage.getItem('userAnswers')) || {};
+            executionPointer = parseInt(localStorage.getItem('currentPointer')) || 0;
+
+            document.getElementById('admin-zone').classList.add('hidden');
+            document.getElementById('student-gateway-zone').classList.add('hidden');
+            
+            // Trap historical state popping cycles
+            history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', () => history.pushState(null, null, window.location.href));
+            
+            transitionToStudentRuntime();
+        }
+
+        function showStudentGatewayForm() {
+            document.getElementById('admin-zone').classList.add('hidden');
+            document.getElementById('gateway-test-title').innerText = globalTestMeta.name;
+            document.getElementById('gateway-test-time-label').innerText = globalTestMeta.duration;
+            document.getElementById('student-gateway-zone').classList.remove('hidden');
+        }
+
+        document.getElementById('gateway-start-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('std-input-name').value.trim();
+            if(!nameInput) {
+                alert("Please enter your name to start the test.");
+                return;
+            }
+            
+            localStorage.setItem('isTestRunning', 'true');
+            localStorage.setItem('timeRemaining', timeBudgetSeconds);
+            localStorage.setItem('userAnswers', JSON.stringify(trackedClientSelections));
+            localStorage.setItem('currentPointer', executionPointer);
+
+            document.getElementById('student-gateway-zone').classList.add('hidden');
+            transitionToStudentRuntime();
+        });
+
+        // --- ADMINISTRATIVE CORE UTILITIES ---
         document.getElementById('csv-uploader').addEventListener('change', (e) => {
             const rawFileNode = e.target.files[0];
             if (!rawFileNode) return;
@@ -318,8 +413,6 @@
                 const newestTargetCardNode = document.getElementById(`editor-card-container-${masterRecordsArray.length - 1}`);
                 if(newestTargetCardNode) {
                     newestTargetCardNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    newestTargetCardNode.classList.add('ring-2', 'ring-emerald-500', 'duration-500');
-                    setTimeout(() => newestTargetCardNode.classList.remove('ring-2', 'ring-emerald-500'), 1500);
                 }
             }, 100);
         });
@@ -351,7 +444,7 @@
 
                 nodeItem.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-gray-400">
-                        <span>DATABASE TARGET INDEX #${indexIdx + 1}</span>
+                        <span>DATABASE ID INDEX #${indexIdx + 1}</span>
                         <div class="flex items-center space-x-3">
                             <span class="bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded">Weight: ${qItem.Points || 1} Pt</span>
                             <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded border border-red-200 transition flex items-center space-x-1 font-bold cursor-pointer">
@@ -361,16 +454,16 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Plain Text String Parameters</label>
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Plain Text Parameters</label>
                             <textarea onchange="mutateStorageCell(${indexIdx}, 'Question', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 h-20 resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none">${qItem.Question}</textarea>
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Diagram Graphic URL Link</label>
-                            <input type="text" placeholder="https://domain.com/assets/visual-graph.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Question Image Web Link URL String</label>
+                            <input type="text" placeholder="https://imgur.com/your-image.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-gray-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Choice Entry Matrices Allocation</label>
+                            <label class="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Choice Alternatives Matrix</label>
                             ${dynamicChoiceBlockRows}
                             <div class="flex items-center space-x-3 pt-1">
-                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Correct Evaluation Key:</span>
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Correct Target Key:</span>
                                 <input type="text" maxlength="1" value="${qItem.Correct || ''}" onchange="mutateStorageCell(${indexIdx}, 'Correct', this.value.toUpperCase())" class="w-10 text-center text-xs font-bold border border-gray-300 rounded p-1 uppercase focus:ring-1 focus:ring-blue-500">
                             </div>
                         </div>
@@ -394,24 +487,28 @@
             }
         };
 
-        // ClassMarker Style Mini-Link Generator (Stores structure data inside Firebase Cloud)
         document.getElementById('generate-link-btn').addEventListener('click', () => {
             if(masterRecordsArray.length === 0) return;
             
             const btnText = document.getElementById('generate-link-btn');
             btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Saving to Cloud...</span>`;
 
-            // Create a randomized premium miniature exam ID tag code
             const uniqueQuizID = "Quiz_" + Math.floor(1000 + Math.random() * 9000);
             
-            // Put full dynamic array structure into cloud database locker reference node
-            databaseRef.ref('quizzes/' + uniqueQuizID).set(masterRecordsArray, (error) => {
+            globalTestMeta.name = document.getElementById('config-test-name').value.trim() || "General Mock Test";
+            globalTestMeta.duration = parseInt(document.getElementById('config-test-time').value) || 120;
+
+            const packagingNodePayload = {
+                testName: globalTestMeta.name,
+                testDuration: globalTestMeta.duration,
+                questions: masterRecordsArray
+            };
+
+            databaseRef.ref('live_quizzes/' + uniqueQuizID).set(packagingNodePayload, (error) => {
                 btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
-                
                 if (error) {
-                    alert("Cloud initialization pipeline encountered network transmission drops.");
+                    alert("Cloud operations connection drops error.");
                 } else {
-                    // Generate clean miniature link structure matching standard systems
                     const shortMiniatureLiveUrl = `${window.location.origin}${window.location.pathname}?quiz=${uniqueQuizID}`;
                     document.getElementById('share-url-string').value = shortMiniatureLiveUrl;
                     document.getElementById('share-modal').classList.remove('hidden');
@@ -419,40 +516,29 @@
             });
         });
 
-        document.getElementById('copy-url-btn').addEventListener('click', () => {
-            const copyInputTarget = document.getElementById('share-url-string');
-            copyInputTarget.select();
-            navigator.clipboard.writeText(copyInputTarget.value);
-            
-            const btnRef = document.getElementById('copy-url-btn');
-            btnRef.innerText = "Copied!";
-            btnRef.className = "bg-green-600 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
-            setTimeout(() => {
-                btnRef.innerText = "Copy Link";
-                btnRef.className = "bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-1.5 rounded transition shrink-0";
-            }, 1500);
-        });
-
-        document.getElementById('close-share-modal').addEventListener('click', () => {
-            document.getElementById('share-modal').classList.add('hidden');
-        });
-
         document.getElementById('admin-launch-btn').addEventListener('click', () => {
-            if (masterRecordsArray.length > 0) transitionToStudentRuntime();
+            if (masterRecordsArray.length > 0) {
+                globalTestMeta.name = document.getElementById('config-test-name').value.trim() || "General Mock Test";
+                globalTestMeta.duration = parseInt(document.getElementById('config-test-time').value) || 120;
+                timeBudgetSeconds = globalTestMeta.duration * 60;
+                
+                document.getElementById('admin-zone').classList.add('hidden');
+                transitionToStudentRuntime();
+            }
         });
 
         function transitionToStudentRuntime() {
             isStudentRuntimeActive = true;
-            document.getElementById('admin-zone').classList.add('hidden');
             document.getElementById('role-badge').innerText = "Student Mode Active";
             document.getElementById('role-badge').className = "bg-green-50 text-green-700 text-xs px-3 py-1.5 rounded-full font-bold border border-green-200";
+            document.getElementById('live-running-test-name').innerText = globalTestMeta.name;
             document.getElementById('student-zone').classList.remove('hidden');
             
             compileStudentNavigationConsole();
             triggerSystemClockTicker();
         }
 
-        // --- STUDENT RUNTIME PORTAL CONTROLLERS ---
+        // --- STUDENT RUNTIME TERMINAL ENGINE ---
         function compileStudentNavigationConsole() {
             renderStudentMatrixDock();
             renderActiveQuestionViewport();
@@ -477,6 +563,7 @@
                 matrixBoxElement.innerText = String(idx + 1).padStart(2, '0');
                 matrixBoxElement.addEventListener('click', () => {
                     executionPointer = idx;
+                    localStorage.setItem('currentPointer', executionPointer);
                     compileStudentNavigationConsole();
                 });
                 targetGridFrame.appendChild(matrixBoxElement);
@@ -529,12 +616,14 @@
 
         window.commitSelection = function(pointerIndex, optionLetterValue) {
             trackedClientSelections[pointerIndex] = optionLetterValue;
+            localStorage.setItem('userAnswers', JSON.stringify(trackedClientSelections));
             compileStudentNavigationConsole();
         };
 
         document.getElementById('nav-action-forward').addEventListener('click', () => {
             if(executionPointer < masterRecordsArray.length - 1) {
                 executionPointer++;
+                localStorage.setItem('currentPointer', executionPointer);
                 compileStudentNavigationConsole();
             } else {
                 evaluateAndPublishScoreboard();
@@ -544,6 +633,7 @@
         document.getElementById('nav-action-back').addEventListener('click', () => {
             if(executionPointer > 0) {
                 executionPointer--;
+                localStorage.setItem('currentPointer', executionPointer);
                 compileStudentNavigationConsole();
             }
         });
@@ -554,7 +644,6 @@
             }
         });
 
-        // See All Dynamic List Modal Engine View
         document.getElementById('modal-trigger-link').addEventListener('click', () => {
             const listFrameElement = document.getElementById('all-q-modal-list');
             listFrameElement.innerHTML = "";
@@ -578,6 +667,7 @@
 
                 itemRowNodeElement.addEventListener('click', () => {
                     executionPointer = idx;
+                    localStorage.setItem('currentPointer', executionPointer);
                     compileStudentNavigationConsole();
                     document.getElementById('all-questions-modal').classList.add('hidden');
                 });
@@ -594,12 +684,15 @@
         function triggerSystemClockTicker() {
             countdownTimerObject = setInterval(() => {
                 timeBudgetSeconds--;
+                localStorage.setItem('timeRemaining', timeBudgetSeconds);
                 
                 if(timeBudgetSeconds <= 0) {
                     clearInterval(countdownTimerObject);
                     document.getElementById('std-clock-readout').innerText = "00:00:00";
+                    
+                    // Specific Time Over Prompt Sequence Requirement
+                    alert("Time over, click OK to see result");
                     evaluateAndPublishScoreboard();
-                    alert("Exam runtime duration allocation has reached its maximum completion limit.");
                 } else {
                     const hoursParameter = Math.floor(timeBudgetSeconds / 3600);
                     const minutesParameter = Math.floor((timeBudgetSeconds % 3600) / 60);
@@ -610,10 +703,10 @@
             }, 1000);
         }
 
-        // --- COMPUTATION EVALUATION SUMMARY ---
         function evaluateAndPublishScoreboard() {
             clearInterval(countdownTimerObject);
-            isStudentRuntimeActive = false; // Release lock state logic
+            isStudentRuntimeActive = false; 
+            localStorage.setItem('isTestRunning', 'false');
             
             let incrementalCorrectCounter = 0;
             let incrementalWrongCounter = 0;
