@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase Core Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -19,6 +20,7 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Header Panel -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="handleLogoClick()">
@@ -38,7 +40,9 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
+        <!-- ================= ADMIN ZONE ================= -->
         <div id="admin-zone" class="space-y-6">
+            <!-- Test Dynamic Settings Card -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-2">
                     <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-gear text-blue-600 mr-2"></i>Global Test Configuration Settings</h3>
@@ -59,6 +63,7 @@
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- CSV Upload -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 1: Batch Upload via CSV</h3>
                     <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
@@ -69,6 +74,7 @@
                         <input type="file" id="csv-uploader" accept=".csv" class="hidden" />
                     </label>
                 </div>
+                <!-- Manual Direct Insertion -->
                 <div class="space-y-3 flex flex-col justify-between">
                     <div>
                         <h3 class="text-sm font-bold uppercase text-gray-400 tracking-wider">Method 2: Manual Direct Insertion</h3>
@@ -80,6 +86,7 @@
                 </div>
             </div>
 
+            <!-- Editor Engine Roster -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 gap-4">
                     <div>
@@ -98,10 +105,22 @@
                 <div id="dynamic-editor-holder" class="space-y-6 divide-y divide-gray-100"></div>
             </div>
 
+            <!-- Admin Live Results & Analytics Table Viewer Card -->
             <div id="admin-results-card" class="hidden bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <div class="border-b border-gray-100 pb-3">
-                    <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i>Live Student Responses & Analytics (Rank Ordered)</h3>
-                    <p class="text-xs text-gray-400">Realtime tracking parameters fetched directly from secure database registry node nodes.</p>
+                <div class="border-b border-gray-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-md font-bold text-gray-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i>Live Student Responses & Analytics (Rank Ordered)</h3>
+                        <p class="text-xs text-gray-400">Realtime tracking parameters fetched directly from secure database registry node nodes.</p>
+                    </div>
+                    <!-- Date Filter and Export System Options -->
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <select id="admin-date-filter" onchange="filterAnalyticsByDate()" class="text-xs border border-gray-300 rounded p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                            <option value="all">All Dates</option>
+                        </select>
+                        <button onclick="exportFilteredAnalyticsToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded transition flex items-center space-x-1">
+                            <i class="fa-solid fa-file-excel"></i> <span>Export to Excel</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
@@ -117,12 +136,14 @@
                             </tr>
                         </thead>
                         <tbody id="admin-results-tbody" class="divide-y divide-gray-100">
-                            </tbody>
+                            <!-- Dynamic rows injected here -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
+        <!-- ================= STUDENT ENTRY GATEWAY INFO FORM ================= -->
         <div id="student-gateway-zone" class="hidden max-w-md mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-md space-y-6">
             <div class="text-center space-y-2">
                 <h2 id="gateway-test-title" class="text-2xl font-black text-gray-900">General Mock Test</h2>
@@ -149,6 +170,7 @@
             </form>
         </div>
 
+        <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center space-y-1">
@@ -207,6 +229,7 @@
             </div>
         </div>
 
+        <!-- ================= ANALYTICS SCOREBOARD PANEL ================= -->
         <div id="results-zone" class="hidden space-y-8 max-w-4xl mx-auto">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-center">
                 <h2 class="text-xl font-bold tracking-tight text-gray-900 uppercase">Test Result Dashboard</h2>
@@ -253,6 +276,7 @@
 
     </main>
 
+    <!-- ================= MODAL CHANNELS ================= -->
     <div id="share-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl border border-gray-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100">
@@ -281,8 +305,8 @@
         </div>
     </div>
 
+    <!-- ================= JAVASCRIPT SYSTEM ENGINE ================= -->
     <script>
-        // --- LIVE CLOUD DATABASE INTEGRATION KEYS ---
         const firebaseConfig = {
             apiKey: "AIzaSyD3mlp1MrulM1dcMsktL9Y-ry4TyS7KP4A",
             authDomain: "mockguide-62695.firebaseapp.com",
@@ -307,6 +331,7 @@
         let currentQuizDatabaseID = "";
         let studentProfile = { name: "", email: "", phone: "" };
         let proctorTabSwitchCount = 0;
+        let globalResultsCache = []; // Admin view rendering dataset tracker
 
         function handleLogoClick() {
             const URLParameters = new URLSearchParams(window.location.search);
@@ -318,13 +343,11 @@
             }
         }
 
-        // Jump to analytics view smoothly
         function scrollToAnalytics() {
             const target = document.getElementById('admin-results-card');
             if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Parse query URL routing (?quiz=ID)
         window.addEventListener('DOMContentLoaded', () => {
             const URLParameters = new URLSearchParams(window.location.search);
             const targetedQuizID = URLParameters.get('quiz');
@@ -352,12 +375,6 @@
                                 document.getElementById('admin-zone').classList.add('hidden');
                                 transitionToStudentRuntime();
                             } else {
-                                // Dynamic validation hook: Name matching block sequence criteria lookup
-                                const normalizedName = (localStorage.getItem('last_entered_name_' + targetedQuizID) || "").toLowerCase().trim();
-                                if(normalizedName !== "" && localStorage.getItem('name_blocked_' + targetedQuizID + '_' + normalizedName) === 'true') {
-                                    blockGatewayWithCustomAlert(`Submission Block Active: The name reference sequence matching your current profile credentials has already locked active entries for this quiz resource instance.`);
-                                    return;
-                                }
                                 timeBudgetSeconds = globalTestMeta.duration * 60;
                                 showStudentGatewayForm();
                             }
@@ -374,57 +391,6 @@
                 fetchAndRenderAdminLeaderboard();
             }
         });
-
-        function blockGatewayWithCustomAlert(msgString) {
-            document.getElementById('admin-zone').classList.add('hidden');
-            document.getElementById('student-gateway-zone').innerHTML = `
-                <div class="text-center space-y-4 p-6 bg-red-50 border border-red-200 rounded-xl">
-                    <i class="fa-solid fa-circle-exclamation text-4xl text-red-500"></i>
-                    <h2 class="text-xl font-bold text-gray-900">Access Restricted</h2>
-                    <p class="text-sm text-gray-600">${msgString}</p>
-                </div>
-            `;
-            document.getElementById('student-gateway-zone').classList.remove('hidden');
-        }
-
-        // Fetch and rank results into admin logs dashboard list
-        function fetchAndRenderAdminLeaderboard() {
-            databaseRef.ref('quiz_results').on('value', (snapshot) => {
-                const tbody = document.getElementById('admin-results-tbody');
-                tbody.innerHTML = "";
-                
-                if (snapshot.exists()) {
-                    document.getElementById('admin-results-card').classList.remove('hidden');
-                    document.getElementById('header-analytics-btn').classList.remove('hidden');
-                    document.getElementById('header-analytics-btn').classList.add('inline-flex');
-                    
-                    let rawList = [];
-                    snapshot.forEach((childQuiz) => {
-                        childQuiz.forEach((entry) => {
-                            rawList.push(entry.val());
-                        });
-                    });
-                    
-                    rawList.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
-                    
-                    rawList.forEach((row, rIdx) => {
-                        const scoreColorClass = row.scorePercent >= 70 ? 'text-emerald-600 font-bold' : (row.scorePercent >= 50 ? 'text-amber-600 font-bold' : 'text-red-600 font-bold');
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-gray-50/80 transition text-gray-700 border-b border-gray-100";
-                        tr.innerHTML = `
-                            <td class="p-3 font-bold text-gray-400">#${rIdx + 1}</td>
-                            <td class="p-3 font-semibold text-gray-900">${row.studentName}</td>
-                            <td class="p-3 text-gray-500">${row.studentEmail || 'N/A'}</td>
-                            <td class="p-3 text-gray-500">${row.studentPhone || 'N/A'}</td>
-                            <td class="p-3 text-center font-mono font-medium">${row.scoreRaw}</td>
-                            <td class="p-3 text-center font-mono ${scoreColorClass}">${row.scorePercent}%</td>
-                            <td class="p-3 text-center font-mono text-red-500 font-bold">${row.tabSwitches || 0}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            });
-        }
 
         function showStudentGatewayForm() {
             document.getElementById('admin-zone').classList.add('hidden');
@@ -443,7 +409,6 @@
                 return;
             }
 
-            // Real-time Cloud validation tracking parameters before entry validation loop
             const quizID = currentQuizDatabaseID || 'preview';
             const lookupKeyName = nameInput.toLowerCase();
 
@@ -458,7 +423,8 @@
                 }
 
                 if(nameAlreadyExists) {
-                    alert(`Access Blocked: The candidate profile identifier "${nameInput}" has an absolute active log record already submitted. Alter your identity string (e.g., add trailing integers like ${nameInput}_2) if re-entry execution parameters were authorized.`);
+                    // Soft alert on duplicate name trigger parameters block row sequence
+                    alert("You have already attempted this test. Contact admin for further request.");
                 } else {
                     studentProfile.name = nameInput;
                     studentProfile.email = emailInput;
@@ -474,7 +440,7 @@
             });
         });
 
-        // --- ADMINISTRATIVE CONFIGURATIONS ---
+        // --- ADMINISTRATIVE ANCHORS ---
         function downloadCSVTemplate() {
             const csvContent = "Question Type: multiplechoice,Parent Category,Category,Random Answers,Correct Feedback,Incorrect Feedback,Points,Question,Correct,Answer A,Answer B,Answer C,Answer D,Answer E\nmultiplechoice,Generic Parent,Generic,No,Well done!,Sorry that is not correct,1,Sample Question text goes here,A,Option A,Option B,Option C,Option D,";
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -649,7 +615,109 @@
             triggerSystemClockTicker();
         }
 
-        // --- STUDENT RUNTIME OPERATIONS ---
+        // --- ADMIN SIDE ANALYTICS MAPPING ---
+        function fetchAndRenderAdminLeaderboard() {
+            databaseRef.ref('quiz_results').on('value', (snapshot) => {
+                globalResultsCache = [];
+                const selectFilter = document.getElementById('admin-date-filter');
+                
+                // Clear dynamic keys except standard template reference string elements
+                selectFilter.innerHTML = '<option value="all">All Dates</option>';
+                let dynamicDatesFoundSet = new Set();
+
+                if (snapshot.exists()) {
+                    document.getElementById('admin-results-card').classList.remove('hidden');
+                    document.getElementById('header-analytics-btn').classList.remove('hidden');
+                    document.getElementById('header-analytics-btn').classList.add('inline-flex');
+                    
+                    snapshot.forEach((childQuiz) => {
+                        childQuiz.forEach((entry) => {
+                            const data = entry.val();
+                            globalResultsCache.push(data);
+                            if(data.submissionDate) {
+                                dynamicDatesFoundSet.add(data.submissionDate);
+                            }
+                        });
+                    });
+                    
+                    // Inject filtered option elements sorted cleanly block row sequences
+                    Array.from(dynamicDatesFoundSet).sort().forEach(dateStr => {
+                        const opt = document.createElement('option');
+                        opt.value = dateStr;
+                        opt.innerText = dateStr;
+                        selectFilter.appendChild(opt);
+                    });
+
+                    renderLeaderboardRows(globalResultsCache);
+                }
+            });
+        }
+
+        function renderLeaderboardRows(dataset) {
+            const tbody = document.getElementById('admin-results-tbody');
+            tbody.innerHTML = "";
+            
+            // Sort structural metrics row descending by percentile standards
+            let sortedData = [...dataset];
+            sortedData.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
+            
+            sortedData.forEach((row, rIdx) => {
+                const scoreColorClass = row.scorePercent >= 70 ? 'text-emerald-600 font-bold' : (row.scorePercent >= 50 ? 'text-amber-600 font-bold' : 'text-red-600 font-bold');
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/80 transition text-gray-700 border-b border-gray-100";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-gray-400">#${rIdx + 1}</td>
+                    <td class="p-3 font-semibold text-gray-900">${row.studentName}</td>
+                    <td class="p-3 text-gray-500">${row.studentEmail || 'N/A'}</td>
+                    <td class="p-3 text-gray-500">${row.studentPhone || 'N/A'}</td>
+                    <td class="p-3 text-center font-mono font-medium">${row.scoreRaw}</td>
+                    <td class="p-3 text-center font-mono ${scoreColorClass}">${row.scorePercent}%</td>
+                    <td class="p-3 text-center font-mono text-red-500 font-bold">${row.tabSwitches || 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAnalyticsByDate() {
+            const targetDate = document.getElementById('admin-date-filter').value;
+            if(targetDate === "all") {
+                renderLeaderboardRows(globalResultsCache);
+            } else {
+                const filtered = globalResultsCache.filter(item => item.submissionDate === targetDate);
+                renderLeaderboardRows(filtered);
+            }
+        }
+
+        function exportFilteredAnalyticsToCSV() {
+            const targetDate = document.getElementById('admin-date-filter').value;
+            let targetDataset = [...globalResultsCache];
+            
+            if(targetDate !== "all") {
+                targetDataset = globalResultsCache.filter(item => item.submissionDate === targetDate);
+            }
+            
+            if(targetDataset.length === 0) {
+                alert("No structural analytics metrics registry active to complete Excel compilation sequences.");
+                return;
+            }
+
+            targetDataset.sort((alpha, beta) => beta.scorePercent - alpha.scorePercent);
+
+            let csvRows = ["Rank,Student Name,Email,Contact No,Score Raw,Percentage,Tab Switch Violations,Submission Date"];
+            targetDataset.forEach((row, index) => {
+                csvRows.push(`"${index + 1}","${row.studentName}","${row.studentEmail || 'N/A'}","${row.studentPhone || 'N/A'}","${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`);
+            });
+
+            const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+            const downloaderAnchor = document.createElement("a");
+            downloaderAnchor.href = URL.createObjectURL(blob);
+            downloaderAnchor.setAttribute("download", `MockGuide_Analytics_Report_${targetDate}.csv`);
+            document.body.appendChild(downloaderAnchor);
+            downloaderAnchor.click();
+            document.body.removeChild(downloaderAnchor);
+        }
+
+        // --- STUDENT RUNTIME PIPELINES ---
         function compileStudentNavigationConsole() {
             const quizID = currentQuizDatabaseID || 'preview';
             localStorage.setItem('trackedClientSelections_' + quizID, JSON.stringify(trackedClientSelections));
@@ -828,12 +896,6 @@
             const quizID = currentQuizDatabaseID || 'preview';
             localStorage.removeItem('isStudentRuntimeActive_' + quizID);
 
-            // Dynamically register name block identifier for this specific user string loop context
-            const lastSavedName = localStorage.getItem('last_entered_name_' + quizID);
-            if(lastSavedName) {
-                localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
-            }
-
             let incrementalCorrectCounter = 0;
             let incrementalWrongCounter = 0;
             let incrementalUnattemptedCounter = 0;
@@ -853,6 +915,10 @@
 
             const rawCalculatedPercentage = Math.round((incrementalCorrectCounter / masterRecordsArray.length) * 100);
 
+            // Constructing string date layouts context tracking schemas
+            const dateObj = new Date();
+            const formattedDateString = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
             if(currentQuizDatabaseID && currentQuizDatabaseID !== "") {
                 const analyticsNodePayload = {
                     studentName: studentProfile.name || "Anonymous",
@@ -861,6 +927,7 @@
                     scoreRaw: `${incrementalCorrectCounter} / ${masterRecordsArray.length}`,
                     scorePercent: rawCalculatedPercentage,
                     tabSwitches: proctorTabSwitchCount,
+                    submissionDate: formattedDateString,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
                 databaseRef.ref('quiz_results/' + currentQuizDatabaseID).push(analyticsNodePayload);
@@ -916,8 +983,8 @@
             document.getElementById('share-modal').classList.add('hidden');
         });
 
-        // Anti-Cheating Key Blocks Loop
-        document.addEventListener('contextmenu', event => event.preventDefault()); // Disables Mouse Right-Click
+        // Anti-Cheating Key Blocks
+        document.addEventListener('contextmenu', event => event.preventDefault()); 
 
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) {
