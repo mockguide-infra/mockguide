@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Core Libraries Connection -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -19,7 +18,25 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Sticky Top Navigation Header -->
+    <script>
+        // Saare global variables ko sabse pehle initialize kiya taaki koi function block na ho
+        var masterRecordsArray = [];
+        var loadedBankQuestionsCache = [];
+        var globalResultsCache = [];
+        var currentQuizDatabaseID = "";
+        var isStudentRuntimeActive = false;
+        var proctorTabSwitchCount = 0;
+        var executionPointer = 0;
+        var timeBudgetSeconds = 0;
+        var countdownTimerObject = null;
+        var studentProfile = { name: "", email: "", phone: "" };
+        var trackedClientSelections = {};
+        var globalTestMeta = {
+            name: "General Mock Test",
+            duration: 120
+        };
+    </script>
+
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="handleLogoClick()">
@@ -29,7 +46,7 @@
                 <span class="text-xl font-black tracking-tight text-slate-900">Mock<span class="text-blue-600">Guide</span></span>
             </div>
             <div class="flex items-center space-x-3">
-                <button id="header-analytics-btn" onclick="scrollToAnalytics()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-3 py-2 rounded-full border border-emerald-200 transition items-center space-x-1">
+                <button id="header-analytics-btn" onclick="scrollToAnalytics()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2 rounded-full border border-emerald-200 transition items-center space-x-1">
                     <i class="fa-solid fa-chart-simple"></i> <span>View Results</span>
                 </button>
                 <span id="role-badge" class="bg-slate-100 text-slate-700 text-xs px-3 py-2 rounded-full font-bold border border-slate-200">
@@ -41,7 +58,6 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
 
-        <!-- ================= SIGN IN WINDOW LAYOUT ================= -->
         <div id="auth-login-zone" class="max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
             <div class="text-center space-y-2">
                 <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl mx-auto border border-blue-100"><i class="fa-solid fa-shield-halved"></i></div>
@@ -66,7 +82,6 @@
             </div>
         </div>
 
-        <!-- ================= SIGN UP WINDOW LAYOUT ================= -->
         <div id="auth-signup-zone" class="hidden max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
             <div class="text-center space-y-2">
                 <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-xl mx-auto border border-purple-100"><i class="fa-solid fa-user-plus"></i></div>
@@ -99,9 +114,7 @@
             </div>
         </div>
 
-        <!-- ================= ADMIN EXECUTIVE WORKSPACE ================= -->
         <div id="admin-zone" class="hidden space-y-6">
-            <!-- Global Specifications Blueprint Box -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 gap-3">
                     <h3 class="text-md font-bold text-slate-900 flex items-center"><i class="fa-solid fa-sliders text-blue-600 mr-2"></i>Global Examination Blueprint Framework Parameters</h3>
@@ -122,7 +135,6 @@
                 </div>
             </div>
 
-            <!-- Unified Dropdown Accordion Feed Dock -->
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider border-b border-slate-100 pb-2"><i class="fa-solid fa-right-to-bracket text-slate-400 mr-1.5"></i>Input Sourcing Interface</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -152,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- SELECTIVE CHECKLIST SYSTEM PANEL OVERVIEW -->
                 <div id="bank-selective-checklist-wrapper" class="hidden border border-purple-100 rounded-xl bg-purple-50/30 p-4 space-y-3">
                     <div class="flex justify-between items-center border-b border-purple-100 pb-2">
                         <h4 class="text-xs font-black text-purple-800 uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1"></i> Choose items from Central Vault Matrix</h4>
@@ -162,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- Active Storage Queue Manifest -->
             <div id="live-manifest-card" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 gap-4">
                     <div>
@@ -171,13 +181,12 @@
                     </div>
                     <div class="flex space-x-3">
                         <button id="generate-link-btn" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition flex items-center space-x-2"><i class="fa-solid fa-link"></i> <span>Create Test Link</span></button>
-                        <button id="admin-launch-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow-md shadow-blue-200 transition flex items-center space-x-2"><span>Preview / Launch Test</span> <i class="fa-solid fa-circle-play"></i></button>
+                        <button id="admin-launch-btn" onclick="triggerAdminDirectPreview()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow-md shadow-blue-200 transition flex items-center space-x-2"><span>Preview / Launch Test</span> <i class="fa-solid fa-circle-play"></i></button>
                     </div>
                 </div>
                 <div id="dynamic-editor-holder" class="space-y-6 divide-y divide-slate-100"></div>
             </div>
 
-            <!-- Analytics Table Performance Log Monitor Grid System View -->
             <div id="admin-results-card" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div class="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
@@ -213,7 +222,6 @@
             </div>
         </div>
 
-        <!-- ================= STUDENT ENTRY GATEWAY INFO FORM ================= -->
         <div id="student-gateway-zone" class="hidden max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-xl space-y-6">
             <div class="text-center space-y-2">
                 <h2 id="gateway-test-title" class="text-2xl font-black text-slate-900">General Mock Test</h2>
@@ -238,10 +246,8 @@
             </form>
         </div>
 
-        <!-- ================= STUDENT EXAM TERMINAL ================= -->
         <div id="student-zone" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <!-- Large Bold Title Box with Sub-Clock Timer -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center space-y-1">
                     <h2 id="live-running-test-name" class="text-3xl font-black text-slate-900 tracking-tight">Mock Test</h2>
                     <p class="text-sm font-bold text-rose-500 tracking-wide font-mono"><i class="fa-regular fa-clock mr-1"></i> Time Remaining: <span id="sync-sub-clock">02:00:00</span></p>
@@ -257,7 +263,7 @@
                         </div>
 
                         <div class="space-y-6">
-                            <div id="std-img-frame" class="hidden w-full max-h-72 overflow-hidden border border-slate-200 rounded-lg flex justify-center bg-slate-50">
+                            <div id="std-img-frame" class="hidden w-full max-h-72 overflow-hidden border border-gray-200 rounded-lg flex justify-center bg-slate-50">
                                 <img id="std-img-payload" src="" alt="Testing Structural Image" class="object-contain p-2 max-h-72" />
                             </div>
                             <h3 id="std-question-text" class="text-lg font-semibold text-slate-900 leading-relaxed whitespace-pre-wrap"></h3>
@@ -266,7 +272,7 @@
                     </div>
 
                     <div class="flex justify-between items-center pt-6 border-t border-slate-100 mt-8">
-                        <button id="nav-action-back" class="border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold px-5 py-2.5 rounded-lg text-sm transition">
+                        <button id="nav-action-back" class="border border-gray-300 hover:bg-gray-50 text-slate-700 font-semibold px-5 py-2.5 rounded-lg text-sm transition">
                             <i class="fa-solid fa-arrow-left mr-2"></i> Previous
                         </button>
                         <button id="nav-action-forward" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition shadow-md">
@@ -292,7 +298,6 @@
             </div>
         </div>
 
-        <!-- ================= ANALYTICS SCOREBOARD PANEL ================= -->
         <div id="results-zone" class="hidden space-y-8 max-w-4xl mx-auto">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
                 <h2 class="text-xl font-bold tracking-tight text-slate-900 uppercase">Test Result Dashboard</h2>
@@ -336,7 +341,6 @@
 
     </main>
 
-    <!-- Modals definitions wrapper systems panels check hooks -->
     <div id="share-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
         <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl border border-slate-100 text-center space-y-4">
             <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 text-xl mx-auto border border-green-100"><i class="fa-solid fa-link"></i></div>
@@ -454,7 +458,7 @@
                     .then((snapshot) => {
                         if (snapshot.exists()) {
                             const packageData = snapshot.val();
-                            masterRecordsArray = packageData.questions;
+                            masterRecordsArray = packageData.questions || [];
                             globalTestMeta.name = packageData.testName || "General Mock Test";
                             globalTestMeta.duration = parseInt(packageData.testDuration) || 120;
 
@@ -603,12 +607,17 @@
                 "Question": "Question Statement Entry Reference Row #" + newIndexID, "Correct": "A", "Answer A": "Option Alpha Placeholder text", "Answer B": "Option Beta Placeholder text", "Answer C": "", "Answer D": "", "Answer E": "", "Points": "1", "ImageUrl": "", "Category": ""
             });
             syncAdminEditormanifest();
+            
+            // Fixed smooth auto scroll to element view
+            setTimeout(() => {
+                const targetElement = document.getElementById(`editor-card-container-${masterRecordsArray.length - 1}`);
+                if(targetElement) targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         });
 
         function syncAdminEditormanifest() {
             const targetContainer = document.getElementById('dynamic-editor-holder'); targetContainer.innerHTML = "";
             
-            // CORE BUG FIX: Hidden state toggle properly unlocked
             if(masterRecordsArray.length > 0) {
                 document.getElementById('live-manifest-card').classList.remove('hidden');
             }
@@ -626,21 +635,35 @@
                     `;
                 });
 
+                // Display custom point values perfectly
+                var pointDisplayVal = qItem.Points ? qItem.Points : "1";
+
                 nodeItem.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-slate-400">
                         <span>QUESTION CONFIG BLOCK ROW INDEX ENTRY #${indexIdx + 1}</span>
-                        <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-lg border border-red-200 text-[11px] transition flex items-center space-x-1 font-bold cursor-pointer"><i class="fa-solid fa-trash-can"></i> <span>Delete</span></button>
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded font-bold">Grade Points: ${pointDisplayVal} Pt</span>
+                            <button onclick="deleteQuestionItem(${indexIdx})" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-lg border border-red-200 text-[11px] transition flex items-center space-x-1 font-bold cursor-pointer"><i class="fa-solid fa-trash-can"></i> <span>Delete</span></button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Question Plain Text String Parameters</label>
                             <textarea onchange="mutateStorageCell(${indexIdx}, 'Question', this.value)" class="w-full text-xs border border-slate-200 rounded p-2 h-20 resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none">${qItem.Question}</textarea>
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Question Image Web Link URL</label>
-                            <input type="text" placeholder="https://imgur.com/your-image.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Question Weight Point</label>
+                                    <input type="number" min="1" value="${pointDisplayVal}" onchange="mutateStorageCell(${indexIdx}, 'Points', this.value); syncAdminEditormanifest();" class="w-full text-xs border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Category Tag</label>
+                                    <input type="text" placeholder="e.g., Math, GK" value="${qItem.Category || ''}" onchange="mutateStorageCell(${indexIdx}, 'Category', this.value)" class="w-full text-xs border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                </div>
+                            </div>
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Optional Question Category Tag</label>
-                            <input type="text" placeholder="Enter Category (e.g., Math, GK)" value="${qItem.Category || ''}" onchange="mutateStorageCell(${indexIdx}, 'Category', this.value)" class="w-full text-xs border border-slate-200 rounded p-2 mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50/50">
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Question Image Web Link URL</label>
+                            <input type="text" placeholder="https://imgur.com/your-image.png" value="${qItem.ImageUrl || ''}" onchange="mutateStorageCell(${indexIdx}, 'ImageUrl', this.value)" class="w-full text-xs border border-slate-200 rounded p-2 focus:ring-1 focus:ring-blue-500 focus:outline-none mb-1">
                             <label class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Choice Alternatives Matrix</label>
                             ${dynamicChoiceBlockRows}
                             <div class="flex items-center space-x-3 pt-1">
@@ -700,7 +723,7 @@
             });
         }
 
-        window.deleteSingleAnalyticsLog = function(quizId, entryKey) { if(confirm("Confirm deletion sequence parameter lock commands from cloud?")) { databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove(); } };
+        window.deleteSingleAnalyticsLog = function(quizId, entryKey) { if(confirm("Confirm deletion sequence parameter log data?")) { databaseRef.ref(`quiz_results/${quizId}/${entryKey}`).remove().then(() => { fetchAndRenderAdminLeaderboard(); }); } };
         function filterAnalyticsByDate() { const targetDate = document.getElementById('admin-date-filter').value; if(targetDate === "all") renderLeaderboardRows(globalResultsCache); else renderLeaderboardRows(globalResultsCache.filter(item => item.submissionDate === targetDate)); }
 
         function exportFilteredAnalyticsToCSV() {
@@ -711,6 +734,20 @@
             targetDataset.forEach((row, index) => { csvRows.push(`"${index + 1}","${row.testTitle || 'N/A'}","${row.studentName}","\t${row.studentEmail || 'N/A'}","\t${row.studentPhone || 'N/A'}","\t${row.scoreRaw}","${row.scorePercent}%","${row.tabSwitches || 0}","${row.submissionDate || 'N/A'}"`); });
             const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
             const downloaderAnchor = document.createElement("a"); downloaderAnchor.href = URL.createObjectURL(blob); downloaderAnchor.setAttribute("download", `MockGuide_Report_${targetDate}.csv`); document.body.appendChild(downloaderAnchor); downloaderAnchor.click(); document.body.removeChild(downloaderAnchor);
+        }
+
+        function scrollToAnalytics() {
+            const target = document.getElementById('admin-results-card');
+            if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function triggerAdminDirectPreview() {
+            if(masterRecordsArray.length === 0) { alert("Please input question elements first."); return; }
+            globalTestMeta.name = document.getElementById('config-test-name').value.trim() || "General Mock Test";
+            globalTestMeta.duration = parseInt(document.getElementById('config-test-time').value) || 120;
+            timeBudgetSeconds = globalTestMeta.duration * 60;
+            document.getElementById('admin-zone').classList.add('hidden');
+            showStudentGatewayForm();
         }
 
         function transitionToStudentRuntime() { isStudentRuntimeActive = true; document.getElementById('role-badge').innerText = "Student Mode Active"; document.getElementById('role-badge').className = "bg-green-50 text-green-700 text-xs px-3 py-2 rounded-full font-bold border border-green-200"; document.getElementById('live-running-test-name').innerText = globalTestMeta.name; document.getElementById('student-zone').classList.remove('hidden'); compileStudentNavigationConsole(); triggerSystemClockTicker(); }
@@ -770,7 +807,38 @@
         });
         document.getElementById('close-all-q-modal').addEventListener('click', () => { document.getElementById('all-questions-modal').classList.add('hidden'); });
 
+        // Generate dynamic share links perfectly
+        document.getElementById('generate-link-btn').addEventListener('click', () => {
+            if(masterRecordsArray.length === 0) return;
+            
+            const btnText = document.getElementById('generate-link-btn');
+            btnText.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Saving to Cloud...</span>`;
+
+            var uniqueQuizID = "Quiz_" + Math.floor(1000 + Math.random() * 9000);
+            globalTestMeta.name = document.getElementById('config-test-name').value.trim() || "General Mock Test";
+            globalTestMeta.duration = parseInt(document.getElementById('config-test-time').value) || 120;
+
+            const packagingNodePayload = {
+                testName: globalTestMeta.name,
+                testDuration: globalTestMeta.duration,
+                questions: masterRecordsArray
+            };
+
+            databaseRef.ref('live_quizzes/' + uniqueQuizID).set(packagingNodePayload)
+                .then(() => {
+                    btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
+                    const shortMiniatureLiveUrl = `${window.location.origin}${window.location.pathname}?quiz=${uniqueQuizID}`;
+                    document.getElementById('share-url-string').value = shortMiniatureLiveUrl;
+                    document.getElementById('share-modal').classList.remove('hidden');
+                })
+                .catch((error) => {
+                    btnText.innerHTML = `<i class="fa-solid fa-link"></i> <span>Create Test Link</span>`;
+                    alert("Cloud saving error: " + error.message);
+                });
+        });
+
         function triggerSystemClockTicker() {
+            if(countdownTimerObject) clearInterval(countdownTimerObject);
             countdownTimerObject = setInterval(() => {
                 timeBudgetSeconds--; const quizID = currentQuizDatabaseID || 'preview'; localStorage.setItem('timeBudgetSeconds_' + quizID, timeBudgetSeconds);
                 if(timeBudgetSeconds <= 0) { clearInterval(countdownTimerObject); document.getElementById('std-clock-readout').innerText = "00:00:00"; alert("Time over!"); evaluateAndPublishScoreboard(); }
@@ -783,7 +851,8 @@
         }
 
         function evaluateAndPublishScoreboard() {
-            clearInterval(countdownTimerObject); isStudentRuntimeActive = false; const quizID = currentQuizDatabaseID || 'preview'; localStorage.removeItem('isStudentRuntimeActive_' + quizID);
+            if(countdownTimerObject) clearInterval(countdownTimerObject); 
+            isStudentRuntimeActive = false; const quizID = currentQuizDatabaseID || 'preview'; localStorage.removeItem('isStudentRuntimeActive_' + quizID);
             const lastSavedName = localStorage.getItem('last_entered_name_' + quizID); if(lastSavedName) localStorage.setItem('name_blocked_' + quizID + '_' + lastSavedName, 'true');
 
             let incrementalCorrectCounter = 0; let incrementalWrongCounter = 0; let incrementalUnattemptedCounter = 0;
